@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="javascript,BigInt,big integer, Rabin cryptosystem, rabin, ">
+<meta name="description" content="Encrypt and decrypt messages using Rabin Cryptosystem">
+<meta name="author" content="Rui Santana Jr">
+<link rel="stylesheet" type="text/css" href="./Rabin.css" />
+<title>Rabin Cryptosystem v1.1</title>
+
+<!-- Created by Rui Santana Jr in 2017 using big int library -->
+
+<script type="text/javascript" src="BigInt2.js"> 
+</script>
+
+<script type="text/javascript" src="rui.js"> 
+</script>
+
+<script type="text/javascript" src="Blob.js"> 
+</script>
+
+<script type="text/javascript">
+
+function gen_rabin() {
+
+	var p, q, i, bits;
+	
+	bits = parseInt(prompt("How strong?", "1248"),10);
+	
+	if (bits < 16)
+		return;
+	
+	if (bits > 3000)
+		if (!confirm("Key stronger than 3000 bits can take take a long time to be genereated\n\nWant to proceed?"))
+			return;
+
+	if (bits > 64) {
+		
+		i = Math.floor(Math.random()*(bits/33));
+		
+		do {
+			p=randTruePrime(Math.floor(bits/2 + i));
+		} while (modInt(p,4) == 1);
+
+		do {
+			q=randTruePrime(Math.floor(bits/2 - i));
+		} while (modInt(q,4) == 1);
+
+	} else {
+		do {
+			p=randTruePrime(Math.floor(bits/2 + 1));
+		} while (modInt(p,4) == 1);
+
+		do {
+			q=randTruePrime(Math.floor(bits/2 - 1));
+		} while (modInt(q,4) == 1);
+	}
+
+	document.getElementById('rabin_pub').innerText=rui_encodeCJK(bigInt2str(mult(p,q),10));
+	document.getElementById('rabin_pvt').innerText=rui_encodeCJK(bigInt2str(p,10)) + "〇" + rui_encodeCJK(bigInt2str(q,10));
+	
+	var nome = prompt("What's yout name?", "");
+	
+	var blob = new Blob([document.getElementById('rabin_pub').innerText], {type: "text/plain;charset=utf-8"});
+	saveAs(blob, nome + "_public.cjk");
+	blob = new Blob([document.getElementById('rabin_pvt').innerText], {type: "text/plain;charset=utf-8"});
+	saveAs(blob, nome + "_private.cjk");
+
+}
+</script>
+
+</head>
+<body>
+
+<noscript>
+<p>
+This page uses JavaScript.<br>
+Please enable JavaScript and reload the page!</p>
+</noscript>
+
+
+<!-- Page content starts here; don't delete this comment. -->
+<div class="container">
+	
+<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⢺</h3>
+
+<div id="nav">
+	<ul>
+<li><a href="./Rabin.html">Rabin Encryption</a></li>
+<li><a href="./Rabin-dec.html">Rabin Decryption</a></li>
+<li><a href="./BigBlock.html">BigBlock enc/dec</a></li>
+<li><a href="./Raes.html">Raes enc/dec</a></li>
+<li><a class="active" href="./tools.html">Tools</a></li>
+<li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
+	</ul>
+</div>
+
+<div class="primary">
+	<h4>CJK characters encoder / decoder:  </h4>
+	<h2>Decimal number:</h2>
+	<div  class="textbox" contenteditable="true" name="dec" id="dec" 
+        onblur="document.getElementById('dec_CJK').innerText=rui_encodeCJK(this.innerText);"></div>
+
+	<h2>CJK number:</h2>
+	<div  class="textbox" contenteditable="true" name="dec_CJK" id="dec_CJK"
+          onblur    ="document.getElementById('dec').innerText=rui_decodeCJK(this.innerText);"></div>
+
+<hr>
+	<h4>Rabin private keys generator: <input type="button" onclick="gen_rabin();" value="Generate"></h4>
+	<h2>Public Key (CJK):</h2>
+	<div  class="textbox" contenteditable="true" name="rabin_pub" id="rabin_pub"></div>
+	<h2>Private Keys (CJK):</h2>
+	<div  class="textbox" contenteditable="true" name="rabin_pvt" id="rabin_pvt"></div>
+
+</div>
+
+
+<h2>Tradutor: decimal &#8596; CJK</h2>
+&bull;&nbsp;Tradutor de número decimal para número codificado com CJK e vice-versa.<br>
+
+<h2>Gerador de chaves "Rabin":</h2>
+&bull;&nbsp;Clique em "Generate" para criar chaves. Chaves acima de 1024 bits são suficientemente fortes.<br>
+&bull;&nbsp;Chaves acima de 2000 bits podem demorar para serem geradas ou travar o navegador.<br>
+&bull;&nbsp;Não recomendo chaves acima de 3000 bits: segurança demasiada desnecessária.<br>
+&bull;&nbsp;Ao término do processo, salve os arquivos e compartilhe sua chave pública.<br>
+&bull;&nbsp;Guarde sua chave particular de preferência em unidade criptografada.<br>
+
+<!--Page content ends here; don't delete this comment.-->
+
+<footer>
+<a href="./index.htm">Página inicial</a> |
+Copy right - Free to use | Release 23/07/2017
+</footer>
+</div>
+</body>
+</html>

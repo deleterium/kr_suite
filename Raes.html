@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="keywords" content="javascript, RAES cryptosystem, RAES" />
+<meta name="description" content="Encrypt and decrypt messages using RAES Cryptosystem" />
+<meta name="author" content="Rui Santana Jr" />
+<link rel="stylesheet" type="text/css" href="./Rabin.css" />
+
+<title>Rui Cryptosystem v1.1</title>
+
+<!-- Created by Rui Santana Jr in 2017 using big int library -->
+
+<script type="text/javascript" src="rui.js"> 
+</script>
+
+<script type="text/javascript">
+// functions exclusive for this page.
+
+function calcular() {
+	
+	var senha, inp, outt, pad, i, len, radios, mode;
+	
+	senha = document.getElementById('txtpass').value;
+	inp = document.getElementById('inp').innerText;
+
+	radios = document.getElementsByName('enc_mode');
+	for (i = 0, len = radios.length; i < len; i++) {
+		if (radios[i].checked) {
+			enc_mode = radios[i].value;
+			break;
+		}
+	}
+	
+	radios = document.getElementsByName('pad_mode');
+	for (i = 0, len = radios.length; i < len; i++) {
+		if (radios[i].checked) {
+			pad = radios[i].value;
+			break;
+		}
+	}
+
+	radios = document.getElementsByName('action');
+	for (i = 0, len = radios.length; i < len; i++) {
+		if (radios[i].checked) {
+			mode = radios[i].value;
+			break;
+		}
+	}
+	
+	if (inp.length < 1)
+		return;
+	
+	if (mode == "encode" )
+	{
+		if (enc_mode == "ECB" )
+			if (pad == "zero" )
+				outt = RAES128_ECB_encrypt_b64( inp, senha, 0);
+			else
+				outt = RAES128_ECB_encrypt_b64( inp, senha, 1);
+		else
+			if (pad == "zero" )
+				outt = RAES128_CBC_encrypt_b64( inp, senha, 0);
+			else
+				outt = RAES128_CBC_encrypt_b64( inp, senha, 1);
+		radios = document.getElementById('inp');
+		document.getElementById('outp').innerText = outt;
+		document.getElementById('hexinput').innerText = rui_bytearray2hex(rui_str2bytearray(inp));
+		document.getElementById('hexoutput').innerText = rui_bytearray2hex(rui_base64decode(outt));
+	}
+	else
+	{
+		if (enc_mode == "ECB" )
+			if (pad == "zero" )
+				outt = RAES128_ECB_decrypt_b64( inp, senha, 0);
+			else
+				outt = RAES128_ECB_decrypt_b64( inp, senha, 1);
+		else
+			if (pad == "zero" )
+				outt = RAES128_CBC_decrypt_b64( inp, senha, 0);
+			else
+				outt = RAES128_CBC_decrypt_b64( inp, senha, 1);
+		document.getElementById('outp').innerText = outt;
+		document.getElementById('hexinput').innerText = rui_bytearray2hex(rui_base64decode(inp));
+		document.getElementById('hexoutput').innerText = rui_bytearray2hex(rui_str2bytearray(document.getElementById('outp').value));
+	}
+	
+}
+
+function sw_enhanced() {
+	if (document.getElementById("tog").style.display == "block") {
+		document.getElementById("tog").style.display = "none";
+		document.getElementById("enhanced").className = "";
+		
+	} else { 
+		document.getElementById("tog").style.display = "block";
+		document.getElementById("enhanced").className = "active";
+	}
+}
+
+
+function resize_textarea(el_id) {
+	
+	var sc_height = el_id.scrollHeight;
+	if (sc_height > el_id.clientHeight)
+		if (sc_height > 700 )
+			el_id.style.height = "600px";
+		else
+			el_id.style.height = sc_height + "px";
+	else
+		el_id.style.height =  "60px";
+}
+
+</script>
+
+</head>
+<body>
+
+<noscript>
+<p>
+This page uses JavaScript.<br>
+Please enable JavaScript and reload the page!</p>
+</noscript>
+
+<!-- Page content starts here; don't delete this comment.  -->
+<div class="rfloat" id="panel" >
+		<iframe src="nayuki-password-generator.html" height="100%" width="100%" ></iframe>
+</div>
+<div class="container">
+<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⢺</h3>
+
+<div id="nav">
+	<ul>
+<li><a href="./Rabin.html">Rabin Encryption</a></li>
+<li><a href="./Rabin-dec.html">Rabin Decryption</a></li>
+<li><a href="./BigBlock.html">BigBlock enc/dec</a></li>
+<li><a class="active" href="./Raes.html">Raes enc/dec</a></li>
+<li><a href="./tools.html">Tools</a></li>
+<li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
+	</ul>
+</div>
+
+<div id="tog" class="secondary">
+	<h2>Hex Password:</h2>
+	<div class="break-word"> 
+		<span contenteditable="true" id="hexpass">000102030405060708090a0b0c0d0e0f</span>
+	</div>
+	<h2>Hex Input:</h2>
+	<div class="break-word"> 
+		<span contenteditable="true" id="hexinput"></span>
+	</div>
+	<h2>Hex Output:</h2>
+	<div class="break-word"> 
+		<span contenteditable="true" id="hexoutput"></span>
+	</div>
+</div>
+
+<div class="primary">
+	<h2>Modo de criptografia: </h2>
+	<label><input type="radio" name="enc_mode" id="enc_mode" value="ECB" checked="checked" /> ECB - Texto de no máximo 16 bytes</label><br>
+	<label><input type="radio" name="enc_mode" id="enc_mode" value="CBC" /> CBC - Texto ou dados de qualquer tamanho</label><br>
+
+	<h2>Padding: </h2>
+	<label><input type="radio" name="pad_mode" id="pad_mode" value="zero" checked="checked" /> Terminador nulo - Texto</label><br>
+	<label><input type="radio" name="pad_mode" id="pad_mode" value="1byte" /> 1 byte - Texto ou dados</label><br>
+
+	<h2>Ação: </h2>
+	<label><input type="radio" name="action" id="action" value="encode" checked="checked" /> Codificar</label><br>
+	<label><input type="radio" name="action" id="action" value="decode" /> Decodificar</label><br>
+
+	<h2>Password: </h2>
+	<input type="password" name="txtpass" id="txtpass" size="80" maxlength="200"
+		onfocus="this.type='text'"
+          onblur    ="if (this.value.length > 1) { document.getElementById('hexpass').innerHTML=rui_bytearray2hex(rui_hash(this.value));} this.type='password';"/>
+
+	<h2>Input: </h2>
+	<div class="textbox" contenteditable="true" id="inp" onblur="calcular();"></div>
+
+    <h2>Output:</h2>
+    <div class="textbox" contenteditable="true" id="outp" ></div>
+
+</div>
+
+
+<h2>Recomendações:</h2>
+&bull;&nbsp;Modo ECB: somente um bloco de informação será codificado. Caracteres especiais usam mais de
+um byte, portanto pode ser que o limite seja atingido mesmo menos de 16 caracteres no texto.<br>
+&bull;&nbsp;Modo ECB: Os blocos criptografados serão encadeado para meior segurança. Também um vetor de
+inicialização aleatório será usado, portanto um bloco extra de informação (16 bytes) será gerado.<br>
+&bull;&nbsp;Padding: escolha o modo como a informação será preenchida para se ter um valor múltiplo de
+16 bytes. Terminador nulo é indicado para textos e são adicionados números aletórios. Portanto textos
+pequenos resultarão em saídas diferentes. Caso a informação seja múltiplo de 16 bytes, o terminador não
+é usado. Já no caso de usar 1 byte, a entrada será adicionada de um byte contendo o número a posição de
+zeros mais um até o final do bloco. É necessário quando criptografar arquivos binários.<br>
+&bull;&nbsp;Password pode ser de qualquer tamanho, inclusive com caracteres especiais.<br>
+&bull;&nbsp;Escolha em "Ação" se a entrada será o texto simples ou codificado.<br>
+&bull;&nbsp;Use 'Tab' para mover ao próximo campo e obter a codificação/decodificação.<br>
+&bull;&nbsp;Os bytes criptografados são convertidos em texto através da codificação Base64.<br>
+&bull;&nbsp;A criptografia é uma variação do AES 128-bit, adicionada de um passo extra de embaralhamento
+bit a bit. A senha, caso não seja 32 caracteres binários, passa uma uma função de hash (rui_hash) variante
+de uma cifra de Feistel.<br>
+
+
+<h2>Bibliografia:</h2>
+&bull;&nbsp;<a href="https://pt.wikipedia.org/wiki/Advanced_Encryption_Standard">Página</a> na Wikipedia sobre o algoritmo de criptografia AES.<br>
+&bull;&nbsp;<a href="https://pt.wikipedia.org/wiki/Base64">Página</a> na Wikipedia sobre o algoritmo de codificação de dados Base64.<br>
+
+
+<!--Page content ends here; don't delete this comment.-->
+
+<p>
+
+<footer>
+<a href="./index.htm">Página inicial</a> |
+Copy right - Free to use | Release 04/12/2017
+</footer>
+</div>
+
+</body>
+</html>

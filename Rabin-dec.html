@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="javascript,BigInt,big integer, Rabin cryptosystem, rabin, ">
+<meta name="description" content="Encrypt and decrypt messages using Rabin Cryptosystem">
+<meta name="author" content="Rui Santana Jr">
+<link rel="stylesheet" type="text/css" href="./Rabin.css" />
+<title>Rabin Cryptosystem v1.1</title>
+
+<!-- Created by Rui Santana Jr in 2017 using big int library -->
+
+<script type="text/javascript" src="BigInt2.js"> 
+</script>
+
+<script type="text/javascript" src="rui.js"> 
+</script>
+
+<script type="text/javascript">
+
+function calcular() {
+
+	var i;
+	
+	var p, q, n_, c, c_, r_, s_, a_, b_, gcd_;
+	var x_, nx_, y_, ny_, mul1_, mul2_;
+	
+	var temp;
+	
+	p = document.getElementById('pp').innerText;
+	q = document.getElementById('qq').innerText;
+	c = rui_decodeCJK(document.getElementById('cc_CJK').innerText);
+	
+	p_ = str2bigInt(p,10,0);
+	q_ = str2bigInt(q,10,0);
+	c_ = str2bigInt(c,10,0);
+	n_ = mult(p_,q_);
+	
+	gcd_=dup(n_);
+	a_=dup(n_);
+	b_=dup(n_);
+	eGCD_(p_,q_, gcd_, a_, b_);
+	
+	temp = addInt(p_,1);
+	divInt_(temp, 4);
+	r_ = powMod(c_, temp, p_);
+
+	temp = addInt(q_,1);
+	divInt_(temp, 4);
+	s_ = powMod(c_, temp,q_);
+	
+	mul1_ = mult(mult(a_,p_),s_);
+	mul2_ = mult(mult(b_,q_),r_);
+
+	y_ = mod( add(mul1_ ,  mul2_ )  , n_);
+	ny_ = sub( n_, y_);
+	if (greater(mul2_,mul1_)) {
+		mul2_=mod(mul2_,n_);
+	} 
+	x_ = mod( sub(mul1_ , mul2_)  , n_);
+	nx_ = sub( n_, x_);
+	
+	x=bigInt2str(x_,10);
+	nx=bigInt2str(nx_,10);
+	y=bigInt2str(y_,10);
+	ny=bigInt2str(ny_,10);
+		
+	
+	document.getElementById('cc').innerText=c;
+	document.getElementById('nn').innerText=bigInt2str(n_,10);
+	document.getElementById('rr').innerText=bigInt2str(r_,10);
+	document.getElementById('ss').innerText=bigInt2str(s_,10);
+	document.getElementById('aa').innerText=bigInt2str(a_,10);
+	document.getElementById('bb').innerText=bigInt2str(b_,10);
+	document.getElementById('xx').innerText =x;
+	document.getElementById('-xx').innerText=nx;
+	document.getElementById('yy').innerText =y;
+	document.getElementById('-yy').innerText=ny;
+	
+	if (x.search("654321") == -1)
+		if (nx.search("654321") == -1)
+			if (y.search("654321") == -1)
+				if (ny.search("654321") == -1)
+					m="Message not found!";
+				else
+					m = rui_dec2str(ny.substring(0,ny.search("654321")));
+			else
+				m = rui_dec2str(y.substring(0,y.search("654321")));
+		else
+			m = rui_dec2str(nx.substring(0,nx.search("654321")));	
+	else
+		m = rui_dec2str(x.substring(0,x.search("654321")));
+
+	document.getElementById('mm').innerText=m;
+
+}
+
+function sw_enhanced() {
+	if (document.getElementById("tog").style.display == "block") {
+		document.getElementById("tog").style.display = "none";
+		document.getElementById("enhanced").className = "";
+		
+	} else { 
+		document.getElementById("tog").style.display = "block";
+		document.getElementById("enhanced").className = "active";
+	}
+}
+
+function extract_values(str_cjk) {
+	
+	var parts = str_cjk.split("〇");
+	var p, q;
+	
+	p = rui_decodeCJK(parts[0]);
+	q = rui_decodeCJK(parts[1]);
+	
+	document.getElementById('pp').innerText= p;
+	document.getElementById('qq').innerText= q;
+	
+	document.getElementById('nn').innerText=bigInt2str(mult(str2bigInt(p,10,0),str2bigInt(q,10,0)),10);
+	
+	
+}
+
+window.onload = function() {
+		var fileInput = document.getElementById('fileInput');
+//		var fileDisplayArea = document.getElementById('fileDisplayArea');
+
+		fileInput.addEventListener('change', function(e) {
+			var file = fileInput.files[0];
+//			var textType = /^(.*\.((cjk)$))?[^.]*$/g;
+
+			var reader = new FileReader();
+
+			reader.onload = function(e) {
+				document.getElementById('pq_CJK').innerText = reader.result;
+				extract_values(reader.result);
+			}
+
+			reader.readAsText(file);	
+		});
+}
+
+</script>
+
+</head>
+<body>
+<noscript>
+<p>
+This page uses JavaScript.<br>
+Please enable JavaScript and reload the page!</p>
+</noscript>
+
+
+<div class="container">
+<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⢺</h3>
+
+<div id="nav">
+	<ul>
+<li><a href="./Rabin.html">Rabin Encryption</a></li>
+<li><a class="active" href="./Rabin-dec.html">Rabin Decryption</a></li>
+<li><a href="./BigBlock.html">BigBlock enc/dec</a></li>
+<li><a href="./Raes.html">Raes enc/dec</a></li>
+<li><a href="./tools.html">Tools</a></li>
+<li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
+	</ul>
+</div>
+
+<div class="primary">
+	<h2>Private Key (CJK): <input type="file" id="fileInput"></h2>
+	<div  class="textbox" contenteditable="true" name="pq_CJK" id="pq_CJK" onblur="extract_values(document.getElementById('pq_CJK').innerHTML);"></div>
+
+	<h2>Cypher (CJK):</h2>
+	<div  class="textbox" contenteditable="true" name="cc_CJK" id="cc_CJK"
+          onblur    ="calcular();"></textarea>
+</div>
+
+<div id="tog" class="secondary">
+	<h2>Private Key:</h2>
+	<div class="break-word">
+		&nbsp;p:&nbsp;<span contenteditable="true" id="pp">3413223142655423215423315263554233251265519</span>
+	</div>
+	<div class="break-word">
+		&nbsp;q:&nbsp;<span contenteditable="true" id="qq">4313223142655423215423315263554233251265521</span>
+	</div>
+
+	<h2>Cypher Decimal:</h2>
+	<div class="break-word"> 
+		&nbsp;c:&nbsp;<span id="cc"></span>
+	</div>
+
+	<h2>Public Key:</h2>
+	<div class="break-word"> 
+		&nbsp;n:&nbsp;<span id="nn"></span>
+	</div>
+
+	<h2>Square Roots:</h2>
+	<div class="break-word"> 
+		&nbsp;r:&nbsp;<span id="rr"></span>
+	</div>
+	<div class="break-word"> 
+		&nbsp;s:&nbsp;<span id="ss"></span>
+	</div>	
+
+	<h2>Euclidean:</h2>
+	<div class="break-word"> 
+		&nbsp;a:&nbsp;<span id="aa"></span>
+	</div>
+	<div class="break-word"> 
+		&nbsp;b:&nbsp;<span id="bb"></span>
+	</div>	
+
+	<h2>Messages</h2>
+	<div class="break-word"> 
+&nbsp;x:&nbsp;<span id="xx"></span>
+	</div>
+
+	<div class="break-word"> 
+‑x:&nbsp;<span id="-xx"></span>
+	</div>	
+	<div class="break-word"> 
+&nbsp;y:&nbsp;<span id="yy"></span>
+	</div>
+	<div class="break-word"> 
+‑y:&nbsp;<span id="-yy"></span>
+	</div>	
+</div>
+
+<div class="primary">
+	<h2>Decoded message:</h2>
+	<div  class="textbox" name="mm" id="mm"></textarea>
+</div>
+
+
+<h2>Recomendações:</h2>
+&bull;&nbsp;Cole sua chave particular ou faça o upload do arquivo .cjk com o conteúdo.<br>
+&bull;&nbsp;Cole a mensagem codificada. Use 'Tab' para mover ao próximo campo e obter a decodificação.<br>
+&bull;&nbsp;Caso queira gerar suas próprias chaves públicas e privadas, vá à pagina "Tools".<br>
+&bull;&nbsp;Clique no menu "Enhanced" e veja todos os números envolvidos na tarefa de decodificação!<br>
+&bull;&nbsp;Também é seguro gerar uma chave pública temporária para cada sessão de conversa.
+
+<h2>Bibliografia:</h2>
+&bull;&nbsp;<a href="https://www.youtube.com/watch?v=Ek6bj11q_Eo">Vídeo</a> no Youtube sobre o sistema de criptografia de Rabin.<br>
+&bull;&nbsp;<a href="https://en.wikipedia.org/wiki/Rabin_cryptosystem">Page</a> in Wikipedia about Rabin's cryptosystem.<br>
+
+
+<!--Page content ends here; don't delete this comment.-->
+
+<footer>
+<a href="./index.htm">Página inicial</a> |
+Copy right - Free to use | Release 23/07/2017
+</footer>
+</div>
+</body>
+</html>

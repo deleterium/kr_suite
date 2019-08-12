@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="keywords" content="javascript,BigInt,big integer, Rabin cryptosystem, rabin" />
+<meta name="description" content="Encrypt and decrypt messages using Rabin Cryptosystem" />
+<meta name="author" content="Rui Santana Jr" />
+<link rel="stylesheet" type="text/css" href="./Rabin.css" />
+
+<title>Rabin Cryptosystem v1.1</title>
+
+<!-- Created by Rui Santana Jr in 2017 using big int library -->
+
+<script type="text/javascript" src="BigInt2.js"> 
+</script>
+
+<script type="text/javascript" src="rui.js"> 
+</script>
+
+<script type="text/javascript">
+// functions exclusive for this page.
+
+function calcular() {
+	
+	var senha, inp;
+	
+	senha = document.getElementById('txtpass').value;
+	inp = document.getElementById('inp').innerText;
+
+	if (inp.length < 1)
+		return;
+	
+	if ( ( inp.charCodeAt(0) - 10240 >=0 ) && ( inp.charCodeAt(0) - 10240 <= 255 ) ) { //inp is encoded
+		//input is text to be decoded
+		b_msg = rui_decode_b_braille(inp);
+		
+		b_senha = rui_hash(senha);
+		
+		b_dec = rui_dec_bigblock(b_msg, b_senha);
+
+		document.getElementById('outp').innerText = rui_bytearray2str(b_dec);
+	} else {
+		//input is text to be encoded
+		b_msg   = rui_str2bytearray(inp);
+
+		b_senha = rui_hash(senha);
+
+		str_enc = rui_encode_b_braille(rui_enc_bigblock(b_msg, b_senha));
+		
+		window.prompt("Encrypted message: Ctrl+C, Enter", str_enc);
+		
+		document.getElementById('outp').innerText = str_enc;
+	}
+	
+}
+
+function sw_enhanced() {
+	if (document.getElementById("tog").style.display == "block") {
+		document.getElementById("tog").style.display = "none";
+		document.getElementById("enhanced").className = "";
+		
+	} else { 
+		document.getElementById("tog").style.display = "block";
+		document.getElementById("enhanced").className = "active";
+	}
+}
+
+</script>
+
+</head>
+<body>
+
+<noscript>
+<p>
+This page uses JavaScript.<br>
+Please enable JavaScript and reload the page!</p>
+</noscript>
+
+<!-- Page content starts here; don't delete this comment.  -->
+<div class="container">
+<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⢺</h3>
+
+<div id="nav">
+	<ul>
+<li><a href="./Rabin.html">Rabin Encryption</a></li>
+<li><a href="./Rabin-dec.html">Rabin Decryption</a></li>
+<li><a class="active" href="./BigBlock.html">BigBlock enc/dec</a></li>
+<li><a href="./Raes.html">Raes enc/dec</a></li>
+<li><a href="./tools.html">Tools</a></li>
+<li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
+	</ul>
+</div>
+
+<div id="tog" class="secondary">
+	<h2>Hex Password:</h2>
+	<div class="break-word"> 
+		<span id="hexpass"></span>
+	</div>
+
+</div>
+
+<div class="primary">
+	<h2>Password: </h2>
+	<input type="password" name="txtpass" id="txtpass" size="80" maxlength="200"
+		onfocus="this.type='text'"
+          onblur    ="if (this.value.length > 1) { document.getElementById('hexpass').innerHTML=rui_bytearray2hex(rui_hash(this.value));} this.type='password';"/>
+
+	<h2>Input: </h2>
+	<div class="textbox" contenteditable="true" id="inp" onblur="calcular();"></div>
+
+    <h2>Output:</h2>
+	<div class="textbox" id="outp"></div>
+
+</div>
+
+
+<h2>Recomendações:</h2>
+&bull;&nbsp;Digite ou cole a senha compartilhada de qualquer tamanho<br>
+&bull;&nbsp;Digite a mensagem a ser codificada ou cole a mensagem a ser decodificada. Use 'Tab' para mover ao próximo campo e obter a codificação/decodificação.<br>
+&bull;&nbsp;Mensagens menores que 24 bytes serão adicionadas de bytes aleatórios para garantir a segurança. Eles serão removidos na decodificação.<br>
+&bull;&nbsp;Sempre gere uma nova senha para cada sessão de conversa.
+
+<h2>Bibliografia:</h2>
+&bull;&nbsp;<a href="https://en.wikipedia.org/wiki/Substitution-permutation_network">Page</a> in Wikipedia about Substitution-permutation network.<br>
+
+
+<!--Page content ends here; don't delete this comment.-->
+
+<p>
+
+<footer>
+<a href="./index.htm">Página inicial</a> |
+Copy right - Free to use | Release 04/12/2017
+</footer>
+</div>
+
+</body>
+</html>

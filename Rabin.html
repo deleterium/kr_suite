@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="javascript,BigInt,big integer, Rabin cryptosystem, rabin, ">
+<meta name="description" content="Encrypt and decrypt messages using Rabin Cryptosystem">
+<meta name="author" content="Rui Santana Jr">
+<link rel="stylesheet" type="text/css" href="./Rabin.css" />
+<title>Rabin Cryptosystem v1.1</title>
+
+<!-- Created by Rui Santana Jr in 2017 using big int library -->
+
+<script type="text/javascript" src="BigInt2.js"> 
+</script>
+
+<script type="text/javascript" src="rui.js"> 
+</script>
+
+<script type="text/javascript">
+
+function add128bit() {
+	
+	var cryptoObject, x, padd, ret;
+
+	if ("crypto" in window)
+		cryptoObject = crypto;
+	else if ("msCrypto" in window)
+		cryptoObject = msCrypto;
+	else
+		return;
+	
+	var x = new Uint32Array(4);
+	cryptoObject.getRandomValues(x);
+	
+	var padd="00000000";
+	
+	for (i=0, ret=""; i<4; i++) {
+		ret += padd.substring(0, 8 - x[i].toString(16).length) + x[i].toString(16);
+	}
+
+	document.getElementById('mm').innerText += ret;
+
+}
+function calcular() {
+
+	var i, mm_dec, mm_rand, cc, cc_base64;
+	var x_, n_;
+	
+	var n_key = document.getElementById('nn').innerText;
+	
+	mm_dec = rui_str2dec(document.getElementById('mm').innerText);
+	
+	if (mm_dec.search("654321") != -1) {
+		alert("Coding returned invalid sequence, please chance the message.");
+		return;
+	}
+	if (mm_dec.length + 7 > n_key.length) {
+		alert("Message too long!");
+		return;
+	}
+
+	mm_rand   = mm_dec + "654321" + rui_genRandomNumbers(n_key.length - mm_dec.length - 7);
+	x_        = str2bigInt(mm_rand,10,0)
+	n_        = str2bigInt(n_key,10,0);
+	squareMod_(x_,n_);
+	cc        = bigInt2str(x_,10);
+	cc_base64 = rui_encodeCJK(cc);
+
+	document.getElementById('mm_rand').innerText = mm_rand;
+	document.getElementById('mm_dec').innerText  = mm_dec;
+	document.getElementById('cc').innerText = cc;
+	document.getElementById('cc_base64').innerText=cc_base64;    //rui_encodebraille(document.forms[0].elements['cc'].value);
+	
+	window.prompt("Encrypted message: Ctrl+C, Enter", cc_base64);
+
+}
+
+function sw_enhanced() {
+	if (document.getElementById("tog").style.display == "block") {
+		document.getElementById("tog").style.display = "none";
+		document.getElementById("enhanced").className = "";
+		
+	} else { 
+		document.getElementById("tog").style.display = "block";
+		document.getElementById("enhanced").className = "active";
+	}
+}
+
+function pn_toggle() {
+	if (document.getElementById("panel").className == "rfloat") {
+		document.getElementById("panel").className = "rfloat_colaps";
+		
+	} else { 
+		document.getElementById("panel").className = "rfloat";
+	}
+}
+
+window.onload = function() {
+		var fileInput = document.getElementById('fileInput');
+//		var fileDisplayArea = document.getElementById('fileDisplayArea');
+
+		fileInput.addEventListener('change', function(e) {
+			var file = fileInput.files[0];
+//			var textType = /.*/;
+
+			var reader = new FileReader();
+
+			reader.onload = function(e) {
+				document.getElementById('nn_CJK').innerText = reader.result;
+				document.getElementById('nn').innerText=rui_decodeCJK(reader.result);
+			}
+
+			reader.readAsText(file);	
+		});
+}
+
+</script>
+
+</head>
+<body>
+<noscript>
+<p>
+This page uses JavaScript.<br>
+Please enable JavaScript and reload the page!</p>
+</noscript>
+
+<!-- Page content starts here; don't delete this comment. -->
+
+<div class="rfloat" id="panel" >
+		<iframe src="nayuki-password-generator.html" height="100%" width="100%" ></iframe>
+</div>
+
+<div class="container">
+<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⢺</h3>
+
+<div id="nav">
+	<ul>
+<li><a class="active" href="./Rabin.html">Rabin Encryption</a></li>
+<li><a href="./Rabin-dec.html">Rabin Decryption</a></li>
+<li><a href="./BigBlock.html">BigBlock enc/dec</a></li>
+<li><a href="./Raes.html">Raes enc/dec</a></li>
+<li><a href="./tools.html">Tools</a></li>
+<li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
+	</ul>
+</div>
+
+<div class="primary">
+	<h2>Public Key CJK:&nbsp;&nbsp;&nbsp;<input type="file" id="fileInput"></h2>
+	<div class="textbox" contenteditable="true" name="nn_CJK" id="nn_CJK" onblur    ="document.getElementById('nn').innerHTML=rui_decodeCJK(document.getElementById('nn_CJK').innerHTML);"></div>
+
+	<h2>Message:&nbsp;&nbsp;&nbsp;<input type="button" value="Add password" onclick="add128bit()">&nbsp;&nbsp;&nbsp;<input type="button" value="Calculate" onclick="calcular()"></h2>
+	<div class="textbox" contenteditable="true" name="mm" id="mm"></div>
+</div>
+
+<div id="tog" class="secondary">
+	<h2>Public Key:</h2>
+	<div class="break-word"> 
+		&nbsp;n:&nbsp;<span contenteditable="true" id="nn" >3413223142655</span>
+	</div>
+
+	<h2>Message Decimal:</h2>
+	<div class="break-word"> 
+		<span id="mm_dec"></span>
+	</div>
+	
+	<h2>Padded Message:</h2>
+	<div class="break-word"> 
+		&nbsp;m:&nbsp;<span id="mm_rand"></span>
+	</div>
+
+	<h2>Cypher:</h2>
+	<div class="break-word"> 
+		&nbsp;c:&nbsp;<span id="cc"></span>
+	</div>
+</div>
+
+<div class="primary">
+    <h2>Cypher CJK:</h2>
+    <div class="textbox" name="cc_base64" id="cc_base64"></div>
+</div>
+
+<h2>Recomendações:</h2>
+&bull;&nbsp;Cole a chave pública do destinatário da mensagem ou faça o upload do arquivo .cjk com aquele conteúdo.<br>
+&bull;&nbsp;Digite a mensagem, se necessário use o botão para adicionar uma senha aleatória de 128-bits para uso na criptografia simétrica "BigBlock".<br>
+&bull;&nbsp;Copie o código gerado e envie para o destinatário.<br>
+&bull;&nbsp;Caso queira gerar suas próprias chaves públicas e privadas, vá à pagina "Tools".<br>
+&bull;&nbsp;Também é seguro gerar uma chave pública temporária para cada sessão de conversa.
+
+<h2>Bibliografia:</h2>
+&bull;&nbsp;<a href="https://www.youtube.com/watch?v=Ek6bj11q_Eo">Vídeo</a> no Youtube sobre o sistema de criptografia de Rabin.<br>
+&bull;&nbsp;<a href="https://en.wikipedia.org/wiki/Rabin_cryptosystem">Page</a> in Wikipedia about Rabin's cryptosystem.<br>
+&bull;&nbsp;<a href="http://www.javascripter.net/math/calculators/100digitbigintcalculator.htm">Calculator</a> for very big integer numbers.<br>
+&bull;&nbsp;Thanks to <a href="http://www.leemon.com/">Leemon Baird</a>, author of Big Integer Library v. 5.5.<br>
+
+<!--Page content ends here; don't delete this comment.-->
+
+<footer>
+<a href="./index.htm">Página inicial</a> |
+Copy right - Free to use | Release 23/07/2017
+</footer>
+</div>
+
+</body>
+</html>
