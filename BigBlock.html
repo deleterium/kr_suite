@@ -7,7 +7,7 @@
 <meta name="author" content="Rui Santana Jr" />
 <link rel="stylesheet" type="text/css" href="./Rabin.css" />
 
-<title>Rabin Cryptosystem v1.1</title>
+<title>Rabin Cryptosystem v1.2</title>
 
 <!-- Created by Rui Santana Jr in 2017 using big int library -->
 
@@ -32,7 +32,7 @@ function calcular() {
 	
 	if ( ( inp.charCodeAt(0) - 10240 >=0 ) && ( inp.charCodeAt(0) - 10240 <= 255 ) ) { //inp is encoded
 		//input is text to be decoded
-		b_msg = rui_decode_b_braille(inp);
+		b_msg = rui_braille2bytearray(inp);
 		
 		b_senha = rui_hash(senha);
 		
@@ -45,7 +45,7 @@ function calcular() {
 
 		b_senha = rui_hash(senha);
 
-		str_enc = rui_encode_b_braille(rui_enc_bigblock(b_msg, b_senha));
+		str_enc = rui_bytearray2braille(rui_enc_bigblock(b_msg, b_senha));
 		
 		window.prompt("Encrypted message: Ctrl+C, Enter", str_enc);
 		
@@ -78,16 +78,34 @@ Please enable JavaScript and reload the page!</p>
 
 <!-- Page content starts here; don't delete this comment.  -->
 <div class="container">
-<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⢺</h3>
+<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⣝</h3>
 
 <div id="nav">
 	<ul>
-<li><a href="./Rabin.html">Rabin Encryption</a></li>
-<li><a href="./Rabin-dec.html">Rabin Decryption</a></li>
-<li><a class="active" href="./BigBlock.html">BigBlock enc/dec</a></li>
-<li><a href="./Raes.html">Raes enc/dec</a></li>
-<li><a href="./tools.html">Tools</a></li>
-<li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
+        <li><a href="./index.html">Home</a></li>
+        <li class="dropdown">
+           <a href="javascript:void(0)"  class="active" >Symmetric-key schemes</a>
+           <div class="dropdown-content">
+             <a href="./Raes.html">Raes enc/dec</a>
+             <a href="./BigBlock.html"  class="active" >BigBlock enc/dec</a>
+           </div>
+        </li>
+        <li class="dropdown">
+           <a href="javascript:void(0)" >Rabin cryptosystem</a>
+           <div class="dropdown-content">
+              <a href="./Rabin-enc.html">Encryption</a>
+              <a href="./Rabin-dec.html">Decryption</a>
+           </div>
+        </li>
+        <li class="dropdown">
+            <a href="javascript:void(0)">Rabin signature</a>
+            <div class="dropdown-content">
+                <a href="./Rabin-sign.html">Sign</a>
+                <a href="./Rabin-verify.html">Verify signature</a>
+            </div>
+        </li>
+        <li><a href="./tools.html">Tools</a></li>
+        <li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
 	</ul>
 </div>
 
@@ -103,7 +121,7 @@ Please enable JavaScript and reload the page!</p>
 	<h2>Password: </h2>
 	<input type="password" name="txtpass" id="txtpass" size="80" maxlength="200"
 		onfocus="this.type='text'"
-          onblur    ="if (this.value.length > 1) { document.getElementById('hexpass').innerHTML=rui_bytearray2hex(rui_hash(this.value));} this.type='password';"/>
+          onblur    ="document.getElementById('hexpass').innerHTML=rui_bytearray2hex(rui_hash(this.value));this.type='password';"/>
 
 	<h2>Input: </h2>
 	<div class="textbox" contenteditable="true" id="inp" onblur="calcular();"></div>
@@ -129,8 +147,7 @@ Please enable JavaScript and reload the page!</p>
 <p>
 
 <footer>
-<a href="./index.htm">Página inicial</a> |
-Copy right - Free to use | Release 04/12/2017
+Copy right - Free to use | Release 10/2019
 </footer>
 </div>
 

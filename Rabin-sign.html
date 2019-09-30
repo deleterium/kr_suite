@@ -6,7 +6,7 @@
 <meta name="description" content="Encrypt and decrypt messages using Rabin Cryptosystem">
 <meta name="author" content="Rui Santana Jr">
 <link rel="stylesheet" type="text/css" href="./Rabin.css" />
-<title>Rabin Cryptosystem v1.1</title>
+<title>Rabin Cryptosystem v1.2</title>
 
 <!-- Created by Rui Santana Jr in 2017 using big int library -->
 
@@ -16,114 +16,97 @@
 <script type="text/javascript" src="rui.js"> 
 </script>
 
+<script type="text/javascript" src="sha512.js"> 
+</script>
+
+<script type="text/javascript" src="Blob.js"> 
+</script>
+
 <script type="text/javascript">
-
-
-function comprr(p_,q_,n_,m_) {
-	
-	
-	var mul1_ = mult( mult( powMod(p_,addInt(q_,-2),q_) , powMod(m_,rightShift(addInt(q_,+1),2),q_) )  ,  p_);
-	
-	var mul2_ = mult( mult( powMod(q_,addInt(p_,-2),p_) , powMod(m_,rightShift(addInt(p_,+1),2),p_) )  ,  q_);
-	
-	return mod( add(mul1_, mul2_) , n_);
-	
-	
-}
-
-function comprr2(p_,q_,n_,m_) {
-	
-	
-	var mul1_ = mult( mult( powMod(p_,addInt(q_,-2),q_) , powMod(m_,rightShift(addInt(q_,+1),2),q_) )  ,  p_);
-	
-	var mul2_ = mult( mult( powMod(q_,addInt(p_,-2),p_) , powMod(m_,rightShift(addInt(p_,+1),2),p_) )  ,  q_);
-	
-	if (greater(mul2_,mul1_))
-		return mod( sub(mul2_, mul1_) , n_);
-	else
-		return mod( sub(mul1_, mul2_) , n_);
-	
-}
-
-function legendre(a_, p_) {
-		
-	var x_ = powMod(a_,rightShift(addInt(p_,-1),1), p_);
-	
-	if (isZero(addInt(x_,-1)))
-		return 1;
-	else
-		return -1;
-//	return isZero(x_) ?  0 : -1;
-		
-}
 
 
 
 function calcular() {
 
-	var i;
-	
-	var p, q, n_, c, c_, r_, s_, a_, na_, gcd_, u_;
-	var x_, nx_, y_, ny_, mul1_, mul2_;
-	
-	var temp;
+    //strings (decimal)
+	var p, q, n, mm_dec, mm_rand;
+	//bigInt's
+	var p_, q_, n_, gcd_, a_, b_, c_, r_, s_;
+	var x_, mul1_, mul2_, cc_sig_, cc_random_;
+	//temporary
+	var temp_, i=0;
 	
 	p = document.getElementById('pp').innerText;
 	q = document.getElementById('qq').innerText;
-	m = rui_decodeCJK(document.getElementById('cc_CJK').innerText);
+	mm_dec = rui_cjk2dec(document.getElementById('cc_CJK').innerText);
 	
+	//prepara valores a ser usados na assinatura. Semelhante à decodificação Rabin.
 	p_ = str2bigInt(p,10,0);
 	q_ = str2bigInt(q,10,0);
-	m_ = str2bigInt(m,10,0);
 	n_ = mult(p_,q_);
-	
-	mu_ = add(m_,randBigInt(256,0));
+
+	gcd_=dup(n_);
+	a_=dup(n_);
+	b_=dup(n_);
+	eGCD_(p_,q_, gcd_, a_, b_);
+
+	//Verifica se a mensagem pode se encaixar no tamanho das chaves usadas
+    if (mm_dec.length + 1 >= bigInt2str(n_,10).length ) {
+        alert("Message too long!");
+        return;
+    }
+
+        
 	do {
-		
-		addInt_(mu_,1);
-			
-		//check if: (m+u)^((p-1)/2) mod p = 1
-		x_ = powMod(mu_,rightShift(addInt(p_,-1),1), p_);
-		
-		//check if: (m+u)^((q-1)/2) mod q = 1
-		y_ = powMod(mu_,rightShift(addInt(q_,-1),1), q_);
-		
-	} while (!(equalsInt(x_,1) && equalsInt(y_,1)));
+        i++;
+        
+        //cria um valor aleatorio
+        n = bigInt2str(n_,10);
+	    mm_rand   = rui_genRandomNumbers(n.length - mm_dec.length );
+    
+	    //codifica para essa mensagem + aleatório
+	    c_ = str2bigInt(mm_rand+mm_dec,10,0);
+	    
+        temp_ = addInt(p_,1);
+        divInt_(temp_, 4);
+        r_ = powMod(c_, temp_, p_);
+
+        temp_ = addInt(q_,1);
+        divInt_(temp_, 4);
+        s_ = powMod(c_, temp_, q_);
 	
-	s_ = comprr(p_,q_,n_,mu_);
-	r_ = squareMod(s_,n_);
-	
-	u_ = sub(mu_, m_);
+        mul1_ = mult(mult(a_,p_),s_);
+        mul2_ = mult(mult(b_,q_),r_);
+
+        x_ = mod( add(mul1_ ,  mul2_ )  , n_);
 
 
-	document.getElementById('cc').innerText=bigInt2str(m_,10);
+        //verifica se a verificação da assinatura será correta
+        temp_ = dup(x_);
+        squareMod_(temp_,n_);
+        if (equals(temp_, c_)) {
+            cc_sig_=dup(x_)
+            cc_random_=str2bigInt(mm_rand,10,0);
+            break;
+        }
+        
+        //Falhou na verificação da assinatura. Refaz para gerar outro aleatório.
+ 	} while (true);
+	
+	document.getElementById('mm_dec').innerText=mm_dec;
+	document.getElementById('mm_rand').innerText=mm_rand;
 	document.getElementById('nn').innerText=bigInt2str(n_,10);
-	document.getElementById('rr').innerText=bigInt2str(u_,10);
+	document.getElementById('rr').innerText=bigInt2str(r_,10);
 	document.getElementById('ss').innerText=bigInt2str(s_,10);
-	document.getElementById('aa').innerText=bigInt2str(x_,10);
-	document.getElementById('bb').innerText=bigInt2str(y_,10);
-//	document.getElementById('xx').innerText =bigInt2str(r_,10);
-//	document.getElementById('-xx').innerText=bigInt2str(sub(n_,r_),10);
-//	document.getElementById('yy').innerText =bigInt2str(a_,10);
-//	document.getElementById('-yy').innerText=bigInt2str(sub(n_,a_),10);
-/*	
-	if (x.search("654321") == -1)
-		if (nx.search("654321") == -1)
-			if (y.search("654321") == -1)
-				if (ny.search("654321") == -1)
-					m="Message not found!";
-				else
-					m = rui_dec2str(ny.substring(0,ny.search("654321")));
-			else
-				m = rui_dec2str(y.substring(0,y.search("654321")));
-		else
-			m = rui_dec2str(nx.substring(0,nx.search("654321")));	
-	else
-		m = rui_dec2str(x.substring(0,x.search("654321")));
-*/
-	document.getElementById('mm').innerText=bigInt2str( sub(squareMod(s_,n_), u_)  ,10);;
+	document.getElementById('aa').innerText=bigInt2str(a_,10);
+	document.getElementById('bb').innerText=bigInt2str(b_,10);
+	document.getElementById('cc_sig').innerText =bigInt2str(cc_sig_,10);
+	document.getElementById('cc_random').innerText=bigInt2str(cc_random_,10);
+	document.getElementById('iterations').innerText =i.toString();
+	document.getElementById('sig').innerText=
+	rui_dec2cjk(bigInt2str(cc_sig_,10)) + ":random:" + rui_dec2cjk(bigInt2str(cc_random_,10));
 
-}
+	}
 
 function sw_enhanced() {
 	if (document.getElementById("tog").style.display == "block") {
@@ -136,13 +119,19 @@ function sw_enhanced() {
 	}
 }
 
+function download_signature() {
+	var blob = new Blob([document.getElementById('sig').innerText], {type: "text/plain;charset=utf-8"});
+	saveAs(blob, fileInput2.value.split('\\').pop().split('/').pop() + ".sign");
+}
+	
+	
 function extract_values(str_cjk) {
 	
 	var parts = str_cjk.split("〇");
 	var p, q;
 	
-	p = rui_decodeCJK(parts[0]);
-	q = rui_decodeCJK(parts[1]);
+	p = rui_cjk2dec(parts[0]);
+	q = rui_cjk2dec(parts[1]);
 	
 	document.getElementById('pp').innerText= p;
 	document.getElementById('qq').innerText= q;
@@ -152,24 +141,44 @@ function extract_values(str_cjk) {
 	
 }
 
+
 window.onload = function() {
-		var fileInput = document.getElementById('fileInput');
-//		var fileDisplayArea = document.getElementById('fileDisplayArea');
+    var fileInput = document.getElementById('fileInput');
 
-		fileInput.addEventListener('change', function(e) {
-			var file = fileInput.files[0];
+    fileInput.addEventListener('change', function(e) {
+        var file = fileInput.files[0];
 //			var textType = /^(.*\.((cjk)$))?[^.]*$/g;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('pq_CJK').innerText = reader.result;
+            extract_values(reader.result);
+        }
+        reader.readAsText(file);	
+    });
 
-			var reader = new FileReader();
-
-			reader.onload = function(e) {
-				document.getElementById('pq_CJK').innerText = reader.result;
-				extract_values(reader.result);
-			}
-
-			reader.readAsText(file);	
-		});
+    var fileInput2 = document.getElementById('fileInput2');
+    fileInput2.addEventListener('change', function(e) {
+        var file2 = fileInput2.files[0];
+        var reader2 = new FileReader();
+        reader2.onloadend = function(e) {
+            if (e.target.readyState == FileReader.DONE) {
+                //var hash = CryptoJS.SHA256(e.target.result);
+                var result1 = new Uint8Array(e.target.result);
+                var hash_hex = Sha512.hash(result1);
+                var hash_dec=bigInt2str(str2bigInt(hash_hex,16,2),10);
+                document.getElementById('cc_CJK').innerText = rui_dec2cjk(hash_dec);
+                calcular();
+            }
+        }
+        reader2.readAsArrayBuffer(file2);
+    });
 }
+
+
+
+
+
+
 
 </script>
 
@@ -183,24 +192,42 @@ Please enable JavaScript and reload the page!</p>
 
 
 <div class="container">
-<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⢺</h3>
+<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⣝</h3>
 
 <div id="nav">
 	<ul>
-<li><a href="./Rabin.html">Rabin Encryption</a></li>
-<li><a class="active" href="./Rabin-dec.html">Rabin Decryption</a></li>
-<li><a href="./BigBlock.html">BigBlock enc/dec</a></li>
-<li><a href="./Raes.html">Raes enc/dec</a></li>
-<li><a href="./tools.html">Tools</a></li>
-<li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
+        <li><a href="./index.html">Home</a></li>
+        <li class="dropdown">
+           <a href="javascript:void(0)">Symmetric-key schemes</a>
+           <div class="dropdown-content">
+             <a href="./Raes.html">Raes enc/dec</a>
+             <a href="./BigBlock.html">BigBlock enc/dec</a>
+           </div>
+        </li>
+        <li class="dropdown">
+           <a href="javascript:void(0)" >Rabin cryptosystem</a>
+           <div class="dropdown-content">
+              <a href="./Rabin-enc.html">Encryption</a>
+              <a href="./Rabin-dec.html">Decryption</a>
+           </div>
+        </li>
+        <li class="dropdown">
+            <a href="javascript:void(0)" class="active">Rabin signature</a>
+            <div class="dropdown-content">
+                <a href="./Rabin-sign.html" class="active">Sign</a>
+                <a href="./Rabin-verify.html">Verify signature</a>
+            </div>
+        </li>
+        <li><a href="./tools.html">Tools</a></li>
+        <li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
 	</ul>
 </div>
 
 <div class="primary">
-	<h2>Private Key (CJK): <input type="file" id="fileInput"></h2>
+	<h2>My Private Key (CJK): <input type="file" id="fileInput"></h2>
 	<div  class="textbox" contenteditable="true" name="pq_CJK" id="pq_CJK" onblur="extract_values(document.getElementById('pq_CJK').innerHTML);"></div>
 
-	<h2>Message (CJK):</h2>
+	<h2>Hash from file (message): <input type="file" id="fileInput2"></h2>
 	<div  class="textbox" contenteditable="true" name="cc_CJK" id="cc_CJK"
           onblur    ="calcular();"></textarea>
 </div>
@@ -214,9 +241,14 @@ Please enable JavaScript and reload the page!</p>
 		&nbsp;q:&nbsp;<span contenteditable="true" id="qq">4313223142655423215423315263554233251265521</span>
 	</div>
 
-	<h2>Cypher Decimal:</h2>
+	<h2>Message Decimal:</h2>
 	<div class="break-word"> 
-		&nbsp;c:&nbsp;<span id="cc"></span>
+		&nbsp;c:&nbsp;<span id="mm_dec"></span>
+	</div>
+
+	<h2>Random Decimal:</h2>
+	<div class="break-word"> 
+		&nbsp;c:&nbsp;<span id="mm_rand"></span>
 	</div>
 
 	<h2>Public Key:</h2>
@@ -240,34 +272,31 @@ Please enable JavaScript and reload the page!</p>
 		&nbsp;b:&nbsp;<span id="bb"></span>
 	</div>	
 
-	<h2>Messages</h2>
+	<h2>Signature:</h2>
 	<div class="break-word"> 
-&nbsp;x:&nbsp;<span id="xx"></span>
+&nbsp;cc_sig:&nbsp;<span id="cc_sig"></span>
 	</div>
 
 	<div class="break-word"> 
-‑x:&nbsp;<span id="-xx"></span>
+&nbsp;cc_random:&nbsp;<span id="cc_random"></span>
 	</div>	
 	<div class="break-word"> 
-&nbsp;y:&nbsp;<span id="yy"></span>
+&nbsp;iterations:&nbsp;<span id="iterations"></span>
 	</div>
-	<div class="break-word"> 
-‑y:&nbsp;<span id="-yy"></span>
-	</div>	
 </div>
 
 <div class="primary">
-	<h2>Decoded message:</h2>
-	<div  class="textbox" name="mm" id="mm"></textarea>
+	<h2>Message signature: <input type="button" value="Download file" onclick="download_signature()"></h2>
+	<div  class="textbox" name="sig" id="sig"></textarea>
 </div>
 
 
 <h2>Recomendações:</h2>
 &bull;&nbsp;Cole sua chave particular ou faça o upload do arquivo .cjk com o conteúdo.<br>
-&bull;&nbsp;Cole a mensagem codificada. Use 'Tab' para mover ao próximo campo e obter a decodificação.<br>
+&bull;&nbsp;Cole a mensagem codificada (cjk), ou faça upload de um arquivo a ser assinado. Será gerado hash com algoritmo SHA512 e o valor atualizado no campo em cjk. Use 'Tab' para mover ao próximo campo e obter a assinatura.<br>
 &bull;&nbsp;Caso queira gerar suas próprias chaves públicas e privadas, vá à pagina "Tools".<br>
 &bull;&nbsp;Clique no menu "Enhanced" e veja todos os números envolvidos na tarefa de decodificação!<br>
-&bull;&nbsp;Também é seguro gerar uma chave pública temporária para cada sessão de conversa.
+&bull;&nbsp;Faça download da assinatura e mantenha junto ao arquivo.
 
 <h2>Bibliografia:</h2>
 &bull;&nbsp;<a href="https://www.youtube.com/watch?v=Ek6bj11q_Eo">Vídeo</a> no Youtube sobre o sistema de criptografia de Rabin.<br>
@@ -277,8 +306,7 @@ Please enable JavaScript and reload the page!</p>
 <!--Page content ends here; don't delete this comment.-->
 
 <footer>
-<a href="./index.htm">Página inicial</a> |
-Copy right - Free to use | Release 23/07/2017
+Copy right - Free to use | Release 10/2019
 </footer>
 </div>
 </body>

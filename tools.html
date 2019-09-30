@@ -6,7 +6,7 @@
 <meta name="description" content="Encrypt and decrypt messages using Rabin Cryptosystem">
 <meta name="author" content="Rui Santana Jr">
 <link rel="stylesheet" type="text/css" href="./Rabin.css" />
-<title>Rabin Cryptosystem v1.1</title>
+<title>Rabin Cryptosystem v1.2</title>
 
 <!-- Created by Rui Santana Jr in 2017 using big int library -->
 
@@ -56,8 +56,8 @@ function gen_rabin() {
 		} while (modInt(q,4) == 1);
 	}
 
-	document.getElementById('rabin_pub').innerText=rui_encodeCJK(bigInt2str(mult(p,q),10));
-	document.getElementById('rabin_pvt').innerText=rui_encodeCJK(bigInt2str(p,10)) + "〇" + rui_encodeCJK(bigInt2str(q,10));
+	document.getElementById('rabin_pub').innerText=rui_dec2cjk(bigInt2str(mult(p,q),10));
+	document.getElementById('rabin_pvt').innerText=rui_dec2cjk(bigInt2str(p,10)) + "〇" + rui_dec2cjk(bigInt2str(q,10));
 	
 	var nome = prompt("What's yout name?", "");
 	
@@ -67,6 +67,57 @@ function gen_rabin() {
 	saveAs(blob, nome + "_private.cjk");
 
 }
+
+function universal_converter(str_from, str_type){
+
+    var str_base10;
+    
+    
+    switch (str_type){
+        case 'text':
+            str_base10 = rui_str2dec(str_from);
+            break;
+        case 'decimal':
+            str_base10 = str_from.slice();
+            break;
+        case 'hexadecimal':
+            str_base10 = rui_hex2dec(str_from);
+            break;
+        case 'base64':
+            str_base10 = rui_base642dec(str_from);
+            break;
+        case 'braille':
+            str_base10 = rui_braille2dec(str_from);
+            break;
+        case 'cjk':
+            str_base10 = rui_cjk2dec(str_from);
+            break;
+        default:
+            return; 
+    }
+    
+    if (!str_type.startsWith("text")){
+        try {
+            document.getElementById('univ_text').innerText=rui_dec2str(str_base10);
+        } catch (e) {
+		document.getElementById('univ_text').innerText="Invalid utf-8 string";
+        }
+    }
+    if (!str_type.startsWith("decimal"))
+        document.getElementById('univ_decimal').innerText=str_base10;
+    if (!str_type.startsWith("hexadecimal"))
+        document.getElementById('univ_hexadecimal').innerText=rui_dec2hex(str_base10);
+    if (!str_type.startsWith("base64"))
+        document.getElementById('univ_base64').innerText=rui_dec2base64(str_base10);
+    if (!str_type.startsWith("braille"))
+        document.getElementById('univ_braille').innerText=rui_dec2braille(str_base10);
+    document.getElementById('univ_bytearray').innerText=rui_dec2bytearray(str_base10);
+    if (!str_type.startsWith("cjk"))
+        document.getElementById('univ_cjk').innerText=rui_dec2cjk(str_base10);
+
+
+}
+
 </script>
 
 </head>
@@ -82,28 +133,66 @@ Please enable JavaScript and reload the page!</p>
 <!-- Page content starts here; don't delete this comment. -->
 <div class="container">
 	
-<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⢺</h3>
+<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⣝</h3>
 
 <div id="nav">
 	<ul>
-<li><a href="./Rabin.html">Rabin Encryption</a></li>
-<li><a href="./Rabin-dec.html">Rabin Decryption</a></li>
-<li><a href="./BigBlock.html">BigBlock enc/dec</a></li>
-<li><a href="./Raes.html">Raes enc/dec</a></li>
-<li><a class="active" href="./tools.html">Tools</a></li>
-<li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
+        <li><a href="./index.html">Home</a></li>
+        <li class="dropdown">
+           <a href="javascript:void(0)">Symmetric-key schemes</a>
+           <div class="dropdown-content">
+             <a href="./Raes.html">Raes enc/dec</a>
+             <a href="./BigBlock.html"  >BigBlock enc/dec</a>
+           </div>
+        </li>
+        <li class="dropdown">
+           <a href="javascript:void(0)" >Rabin cryptosystem</a>
+           <div class="dropdown-content">
+              <a href="./Rabin-enc.html">Encryption</a>
+              <a href="./Rabin-dec.html">Decryption</a>
+           </div>
+        </li>
+        <li class="dropdown">
+            <a href="javascript:void(0)">Rabin signature</a>
+            <div class="dropdown-content">
+                <a href="./Rabin-sign.html">Sign</a>
+                <a href="./Rabin-verify.html">Verify signature</a>
+            </div>
+        </li>
+        <li><a href="./tools.html" class="active">Tools</a></li>
+        <li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
 	</ul>
 </div>
 
 <div class="primary">
-	<h4>CJK characters encoder / decoder:  </h4>
+
+	<h4>Universal converter:  </h4>
+	<h2>Text message:</h2>
+	<div  class="textbox" contenteditable="true" name="univ_text" id="univ_text" 
+	    onkeyup="universal_converter(this.innerText,'text')"></div>
+
 	<h2>Decimal number:</h2>
-	<div  class="textbox" contenteditable="true" name="dec" id="dec" 
-        onblur="document.getElementById('dec_CJK').innerText=rui_encodeCJK(this.innerText);"></div>
+	<div  class="textbox" contenteditable="true" name="univ_decimal" id="univ_decimal" 
+        onkeyup="universal_converter(this.innerText,'decimal')"></div>
+
+	<h2>Hexadecimal number:</h2>
+	<div  class="textbox" contenteditable="true" name="univ_hexadecimal" id="univ_hexadecimal" 
+        onkeyup="universal_converter(this.innerText,'hexadecimal')"></div>
+
+	<h2>Base64:</h2>
+	<div  class="textbox" contenteditable="true" name="univ_base64" id="univ_base64" 
+        onkeyup="universal_converter(this.innerText,'base64')"></div>
+
+	<h2>Braille number:</h2>
+	<div  class="textbox" contenteditable="true" name="univ_braille" id="univ_braille" 
+        onkeyup="universal_converter(this.innerText,'braille')"></div>
+
+    <h2>Byte array:</h2>
+	<div  class="textbox" contenteditable="false" name="univ_bytearray" id="univ_bytearray"></div>
 
 	<h2>CJK number:</h2>
-	<div  class="textbox" contenteditable="true" name="dec_CJK" id="dec_CJK"
-          onblur    ="document.getElementById('dec').innerText=rui_decodeCJK(this.innerText);"></div>
+	<div  class="textbox" contenteditable="true" name="univ_cjk" id="univ_cjk"
+          onkeyup="universal_converter(this.innerText,'cjk')"></div>
 
 <hr>
 	<h4>Rabin private keys generator: <input type="button" onclick="gen_rabin();" value="Generate"></h4>
@@ -128,8 +217,7 @@ Please enable JavaScript and reload the page!</p>
 <!--Page content ends here; don't delete this comment.-->
 
 <footer>
-<a href="./index.htm">Página inicial</a> |
-Copy right - Free to use | Release 23/07/2017
+Copy right - Free to use | Release 10/2019
 </footer>
 </div>
 </body>

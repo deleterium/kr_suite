@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="keywords" content="javascript,BigInt,big integer, Rabin cryptosystem, rabin" />
+<meta name="description" content="Encrypt and decrypt messages using Rabin Cryptosystem" />
+<meta name="author" content="Rui Santana Jr" />
+<link rel="stylesheet" type="text/css" href="./Rabin.css" />
+
+<title>Cryptosystem suite by Rui v1.2</title>
+
+<!-- First release by Rui Santana Jr in 2017 using big int library -->
+
+</head>
+<body>
+
+<noscript>
+<p>
+This page uses JavaScript.<br>
+Please enable JavaScript and reload the page!</p>
+</noscript>
+
+<!-- Page content starts here; don't delete this comment.  -->
+<div class="container">
+	
+<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⣝</h3>
+
+<div id="nav">
+	<ul>
+        <li><a href="./index.html" class="active">Home</a></li>
+        <li class="dropdown">
+           <a href="javascript:void(0)">Symmetric-key schemes</a>
+           <div class="dropdown-content">
+             <a href="./Raes.html">Raes enc/dec</a>
+             <a href="./BigBlock.html"  >BigBlock enc/dec</a>
+           </div>
+        </li>
+        <li class="dropdown">
+           <a href="javascript:void(0)" >Rabin cryptosystem</a>
+           <div class="dropdown-content">
+              <a href="./Rabin-enc.html">Encryption</a>
+              <a href="./Rabin-dec.html">Decryption</a>
+           </div>
+        </li>
+        <li class="dropdown">
+            <a href="javascript:void(0)">Rabin signature</a>
+            <div class="dropdown-content">
+                <a href="./Rabin-sign.html">Sign</a>
+                <a href="./Rabin-verify.html">Verify signature</a>
+            </div>
+        </li>
+        <li><a href="./tools.html">Tools</a></li>
+        <li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
+	</ul>
+</div>
+
+<div class="primary">
+	<p>&nbsp;</p>
+	<h2>Rabin</h2>
+<p>O método Rabin de criptografia utiliza chaves assimétricas, ou seja, a chave para criptografar é diferente da
+chave para descriptografar o conteúdo. É muito usado quando o emissor e o receptor não podem se comunicar secreetamente
+antes de enviar mensagens. Nesse caso o emissor só precisa ter certeza que sabe a chave pública do receptor, pois somente
+ele poderá saber o conteúdo da mensagem.</p>
+<p>Para usá-la, primeiramente crie suas próprias chaves, na página "Tools". Escolha um tamanho adequado de chave (geralmente
+entre 1024 e 2500 bits) levando-se em conta o esforço que pode ser utilizado para ataques e o tempo de troca
+entre chaves públicas. Guarde a chave particular somente em seu computador ou pendrive, de preferência em
+sistema criptografados. Distribua sua chave pública para as pessoas que deseja que mandem mensagem secretas.
+Distribua também essa página com a suíte de programas.</p>
+<p>Uma das possibilidades é usar a criptografia Rabin para a troca de mensagens, que, embora bastante segura, também 
+demanda muito esforço computacional e não é prática. A segunda alternativa é usar a criptografia Rabin para informar 
+uma senha comum com a outra parte, e a partir daí usar a criptografia BigBlock ou RAES que é mais prática para conversas.</p>
+	<h2>BigBlock</h2>
+<p>Esse método é baseado no embaralhamento da mensagem com a chave. Consiste em alternar, reverter e rotacionar os bytes
+da mensagem enquanto mistura-os com uma expansão da chave. O nome foi escolhido pois o tamanho do bloco para criptografia
+é o tamanho da informação, sendo que mensagens menores que 24 bytes serão aumentadas para garantir a segurança de mensagens
+curtas.</p>
+<p>Como esse método usa chave simétrica, tanto o emissor quanto o receptor precisam sabê-la. O texto é codificado em
+caracteres braille, ficando fácil saber quando a mensagem foi criptografada com esse método.</p>
+	<h2>Raes</h2>
+<p>Método baseado na já difundida criptografia AES 128-bit. Foi adicionado mais um passo de embaralhamento bit a bit.
+Também é um método de chave simétrica, necessitando tanto emissor quanto receptor saberem a senha.</p>
+<p>Recomendo utilizá-lo para salvar suas senhas codificadas, pois é bastante efetivo para pequenos textos. A informação é
+codificada em Base64 para ser mostrada como texto.</p>
+
+
+    <h2>Informações gerais</h2>
+<p>É mais seguro ainda fazer o download desse site e usá-lo diretamente no seu computador <a href="./kr_suite-1.1.zip">kr_suite-1.1.zip</a>.
+Ele não depende de nenhuma
+comunicação com a internet para funcionar. Distribua para as pessoas que também quiserem usar a criptografia para comunicação.</p>
+</div>
+
+<footer>
+Copy right - Free to use | Release v1.0 23/07/2017 v1.1 04/12/2017 v1.2 10/2019
+</footer>
+
+</div>
+
+</body>
+</html>

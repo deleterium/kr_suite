@@ -6,7 +6,7 @@
 <meta name="description" content="Encrypt and decrypt messages using Rabin Cryptosystem">
 <meta name="author" content="Rui Santana Jr">
 <link rel="stylesheet" type="text/css" href="./Rabin.css" />
-<title>Rabin Cryptosystem v1.1</title>
+<title>Rabin Cryptosystem v1.2</title>
 
 <!-- Created by Rui Santana Jr in 2017 using big int library -->
 
@@ -43,7 +43,7 @@ function add128bit() {
 }
 function calcular() {
 
-	var i, mm_dec, mm_rand, cc, cc_base64;
+	var i, mm_dec, mm_rand, cc, cc_CJK;
 	var x_, n_;
 	
 	var n_key = document.getElementById('nn').innerText;
@@ -64,14 +64,14 @@ function calcular() {
 	n_        = str2bigInt(n_key,10,0);
 	squareMod_(x_,n_);
 	cc        = bigInt2str(x_,10);
-	cc_base64 = rui_encodeCJK(cc);
+	cc_CJK = rui_dec2cjk(cc);
 
 	document.getElementById('mm_rand').innerText = mm_rand;
 	document.getElementById('mm_dec').innerText  = mm_dec;
 	document.getElementById('cc').innerText = cc;
-	document.getElementById('cc_base64').innerText=cc_base64;    //rui_encodebraille(document.forms[0].elements['cc'].value);
+	document.getElementById('cc_CJK').innerText=cc_CJK;    //rui_encodebraille(document.forms[0].elements['cc'].value);
 	
-	window.prompt("Encrypted message: Ctrl+C, Enter", cc_base64);
+	window.prompt("Encrypted message: Ctrl+C, Enter", cc_CJK);
 
 }
 
@@ -107,7 +107,7 @@ window.onload = function() {
 
 			reader.onload = function(e) {
 				document.getElementById('nn_CJK').innerText = reader.result;
-				document.getElementById('nn').innerText=rui_decodeCJK(reader.result);
+				document.getElementById('nn').innerText=rui_cjk2dec(reader.result);
 			}
 
 			reader.readAsText(file);	
@@ -131,22 +131,40 @@ Please enable JavaScript and reload the page!</p>
 </div>
 
 <div class="container">
-<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⢺</h3>
+<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⣝</h3>
 
 <div id="nav">
 	<ul>
-<li><a class="active" href="./Rabin.html">Rabin Encryption</a></li>
-<li><a href="./Rabin-dec.html">Rabin Decryption</a></li>
-<li><a href="./BigBlock.html">BigBlock enc/dec</a></li>
-<li><a href="./Raes.html">Raes enc/dec</a></li>
-<li><a href="./tools.html">Tools</a></li>
-<li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
+        <li><a href="./index.html">Home</a></li>
+        <li class="dropdown">
+           <a href="javascript:void(0)">Symmetric-key schemes</a>
+           <div class="dropdown-content">
+             <a href="./Raes.html">Raes enc/dec</a>
+             <a href="./BigBlock.html">BigBlock enc/dec</a>
+           </div>
+        </li>
+        <li class="dropdown">
+           <a href="javascript:void(0)" class="active">Rabin cryptosystem</a>
+           <div class="dropdown-content">
+              <a href="./Rabin-enc.html" class="active">Encryption</a>
+              <a href="./Rabin-dec.html">Decryption</a>
+           </div>
+        </li>
+        <li class="dropdown">
+            <a href="javascript:void(0)">Rabin signature</a>
+            <div class="dropdown-content">
+                <a href="./Rabin-sign.html">Sign</a>
+                <a href="./Rabin-verify.html">Verify signature</a>
+            </div>
+        </li>
+        <li><a href="./tools.html">Tools</a></li>
+        <li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
 	</ul>
 </div>
 
 <div class="primary">
 	<h2>Public Key CJK:&nbsp;&nbsp;&nbsp;<input type="file" id="fileInput"></h2>
-	<div class="textbox" contenteditable="true" name="nn_CJK" id="nn_CJK" onblur    ="document.getElementById('nn').innerHTML=rui_decodeCJK(document.getElementById('nn_CJK').innerHTML);"></div>
+	<div class="textbox" contenteditable="true" name="nn_CJK" id="nn_CJK" onblur    ="document.getElementById('nn').innerHTML=rui_cjk2dec(document.getElementById('nn_CJK').innerHTML);"></div>
 
 	<h2>Message:&nbsp;&nbsp;&nbsp;<input type="button" value="Add password" onclick="add128bit()">&nbsp;&nbsp;&nbsp;<input type="button" value="Calculate" onclick="calcular()"></h2>
 	<div class="textbox" contenteditable="true" name="mm" id="mm"></div>
@@ -176,7 +194,7 @@ Please enable JavaScript and reload the page!</p>
 
 <div class="primary">
     <h2>Cypher CJK:</h2>
-    <div class="textbox" name="cc_base64" id="cc_base64"></div>
+    <div class="textbox" name="cc_CJK" id="cc_CJK"></div>
 </div>
 
 <h2>Recomendações:</h2>
@@ -195,8 +213,7 @@ Please enable JavaScript and reload the page!</p>
 <!--Page content ends here; don't delete this comment.-->
 
 <footer>
-<a href="./index.htm">Página inicial</a> |
-Copy right - Free to use | Release 23/07/2017
+Copy right - Free to use | Release 10/2019
 </footer>
 </div>
 

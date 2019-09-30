@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="keywords" content="javascript,BigInt,big integer, Rabin cryptosystem, rabin, ">
+<meta name="description" content="Encrypt and decrypt messages using Rabin Cryptosystem">
+<meta name="author" content="Rui Santana Jr">
+<link rel="stylesheet" type="text/css" href="./Rabin.css" />
+<title>Rabin Cryptosystem v1.2</title>
+
+<!-- Created by Rui Santana Jr in 2017 using big int library -->
+
+<script type="text/javascript" src="BigInt2.js"> 
+</script>
+
+<script type="text/javascript" src="rui.js"> 
+</script>
+
+<script type="text/javascript" src="sha512.js"> 
+</script>
+
+<script type="text/javascript">
+
+function calcular() {
+
+    //strings in decimal
+	var n_key, mm, sig, cc_sig, cc_random,  mm_payload, mm_decoded;
+	//bigInt's
+	var cc_sig_, n_, mm_decoded_;
+	//strings
+	var result;
+	
+	n_key = rui_cjk2dec(document.getElementById('nn_CJK').innerText);
+	mm    = rui_cjk2dec(document.getElementById('mm_CJK').innerText);
+	
+	sig         =document.getElementById('sig').innerText.split(":random:");
+	cc_sig      =rui_cjk2dec(sig[0]);
+	cc_random   =rui_cjk2dec(sig[1]);
+	
+	cc_sig_     = str2bigInt(cc_sig,10,0)
+	n_          = str2bigInt(n_key ,10,0);
+	mm_decoded_ = dup(cc_sig_);
+
+	squareMod_(mm_decoded_,n_); //efectivamente faz a decodificação
+
+	mm_decoded  = bigInt2str(mm_decoded_,10);
+
+	if (mm_decoded.startsWith(cc_random)){
+        mm_payload=mm_decoded.replace(cc_random,'');
+
+        if (equals(str2bigInt(mm_payload,10,0),str2bigInt(mm,10,0)))
+            result = "OK! File/Message verified!";
+        else
+            result = "ERROR verifing File/Message. Hash error";
+	} else
+        result = "ERROR verifing File/Message. Signature error";
+
+
+    document.getElementById('nn').innerText=n_key;
+	document.getElementById('mm').innerText=mm;
+	document.getElementById('cc_sig').innerText=cc_sig;
+	document.getElementById('cc_random').innerText=cc_random;
+	document.getElementById('mm_decoded_dec').innerText = mm_decoded;
+	document.getElementById('result').innerText = result;
+
+        
+}
+
+function sw_enhanced() {
+	if (document.getElementById("tog").style.display == "block") {
+		document.getElementById("tog").style.display = "none";
+		document.getElementById("enhanced").className = "";
+		
+	} else { 
+		document.getElementById("tog").style.display = "block";
+		document.getElementById("enhanced").className = "active";
+	}
+}
+
+window.onload = function() {
+		var fileInput = document.getElementById('fileInput');
+
+		fileInput.addEventListener('change', function(e) {
+			var file = fileInput.files[0];
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				document.getElementById('nn_CJK').innerText = reader.result;
+			}
+			reader.readAsText(file);	
+		});
+		
+		var fileInput2 = document.getElementById('fileInput2');
+		fileInput2.addEventListener('change', function(e) {
+            var file2 = fileInput2.files[0];
+            var reader2 = new FileReader();
+            reader2.onloadend = function(e) {
+                if (e.target.readyState == FileReader.DONE) {
+                    var result1 = new Uint8Array(e.target.result);
+                    var hash_hex = Sha512.hash(result1);
+                    var hash_dec=bigInt2str(str2bigInt(hash_hex,16,2),10);
+                    document.getElementById('mm_CJK').innerText = rui_dec2cjk(hash_dec);
+//                    calcular();
+                }
+            }
+            reader2.readAsArrayBuffer(file2);
+        });
+
+		var fileInput3 = document.getElementById('fileInput3');
+   		fileInput3.addEventListener('change', function(e) {
+			var file3 = fileInput3.files[0];
+			var reader3 = new FileReader();
+			reader3.onload = function(e) {
+				document.getElementById('sig').innerText = reader3.result;
+				calcular();
+			}
+			reader3.readAsText(file3);	
+		});
+
+}
+
+</script>
+
+</head>
+<body>
+<noscript>
+<p>
+This page uses JavaScript.<br>
+Please enable JavaScript and reload the page!</p>
+</noscript>
+
+<!-- Page content starts here; don't delete this comment. -->
+
+<div class="container">
+<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⣝</h3>
+
+<div id="nav">
+	<ul>
+        <li><a href="./index.html">Home</a></li>
+        <li class="dropdown">
+           <a href="javascript:void(0)">Symmetric-key schemes</a>
+           <div class="dropdown-content">
+             <a href="./Raes.html">Raes enc/dec</a>
+             <a href="./BigBlock.html">BigBlock enc/dec</a>
+           </div>
+        </li>
+        <li class="dropdown">
+           <a href="javascript:void(0)" >Rabin cryptosystem</a>
+           <div class="dropdown-content">
+              <a href="./Rabin-enc.html">Encryption</a>
+              <a href="./Rabin-dec.html">Decryption</a>
+           </div>
+        </li>
+        <li class="dropdown">
+            <a href="javascript:void(0)" class="active">Rabin signature</a>
+            <div class="dropdown-content">
+                <a href="./Rabin-sign.html">Sign</a>
+                <a href="./Rabin-verify.html" class="active">Verify signature</a>
+            </div>
+        </li>
+        <li><a href="./tools.html">Tools</a></li>
+        <li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
+	</ul>
+</div>
+
+<div class="primary">
+	<h2>Sender's Public Key CJK:&nbsp;&nbsp;&nbsp;<input type="file" id="fileInput"></h2>
+	<div class="textbox" contenteditable="true" name="nn_CJK" id="nn_CJK"></div>
+
+	<h2>Hash from file (or message):&nbsp;&nbsp;&nbsp;<input type="file" id="fileInput2"></h2>
+	<div class="textbox" contenteditable="true" name="mm_CJK" id="mm_CJK"></div>
+	
+	<h2>Signature:&nbsp;&nbsp;&nbsp;<input type="file" id="fileInput3">&nbsp;&nbsp;&nbsp;<input type="button" value="Calculate" onclick="calcular()"></h2>
+	<div class="textbox" contenteditable="true" name="sig" id="sig"></div>
+</div>
+
+<div id="tog" class="secondary">
+	<h2>Public Key:</h2>
+	<div class="break-word"> 
+		&nbsp;n:&nbsp;<span contenteditable="true" id="nn" >3413223142655</span>
+	</div>
+
+	<h2>Hash from file (message):</h2>
+	<div class="break-word"> 
+		<span id="mm"></span>
+	</div>
+
+	<h2>Cypher (from signature):</h2>
+	<div class="break-word"> 
+		&nbsp;c:&nbsp;<span id="cc_sig"></span>
+	</div>
+
+	
+	<h2>Random Padding (from signature):</h2>
+	<div class="break-word"> 
+		&nbsp;m:&nbsp;<span id="cc_random"></span>
+	</div>
+
+	<h2>Message (decoded from signature):</h2>
+	<div class="break-word"> 
+		&nbsp;c:&nbsp;<span id="mm_decoded_dec"></span>
+	</div>
+</div>
+
+<div class="primary">
+    <h2>Result:</h2>
+    <div class="textbox" name="result" id="result"></div>
+</div>
+
+<h2>Recomendações:</h2>
+&bull;&nbsp;Cole a chave pública do destinatário da mensagem ou faça o upload do arquivo .cjk com aquele conteúdo.<br>
+&bull;&nbsp;Digite a mensagem, se necessário use o botão para adicionar uma senha aleatória de 128-bits para uso na criptografia simétrica "BigBlock".<br>
+&bull;&nbsp;Copie o código gerado e envie para o destinatário.<br>
+&bull;&nbsp;Caso queira gerar suas próprias chaves públicas e privadas, vá à pagina "Tools".<br>
+&bull;&nbsp;Também é seguro gerar uma chave pública temporária para cada sessão de conversa.
+
+<h2>Bibliografia:</h2>
+&bull;&nbsp;<a href="https://www.youtube.com/watch?v=Ek6bj11q_Eo">Vídeo</a> no Youtube sobre o sistema de criptografia de Rabin.<br>
+&bull;&nbsp;<a href="https://en.wikipedia.org/wiki/Rabin_cryptosystem">Page</a> in Wikipedia about Rabin's cryptosystem.<br>
+&bull;&nbsp;<a href="http://www.javascripter.net/math/calculators/100digitbigintcalculator.htm">Calculator</a> for very big integer numbers.<br>
+&bull;&nbsp;Thanks to <a href="http://www.leemon.com/">Leemon Baird</a>, author of Big Integer Library v. 5.5.<br>
+
+<!--Page content ends here; don't delete this comment.-->
+
+<footer>
+Copy right - Free to use | Release 10/2019
+</footer>
+</div>
+
+</body>
+</html>
