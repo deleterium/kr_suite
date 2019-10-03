@@ -118,6 +118,12 @@ function universal_converter(str_from, str_type){
 
 }
 
+window.onload = function() {
+	document.getElementById("myStorage").innerHTML = localStorage.getItem("tools_storage");
+}
+
+
+
 </script>
 
 </head>
@@ -165,7 +171,13 @@ Please enable JavaScript and reload the page!</p>
 </div>
 
 <div class="primary">
-
+	<h4>Rabin private keys generator: <input type="button" onclick="gen_rabin();" value="Generate"></h4>
+	<h2>Public Key (CJK):</h2>
+	<div  class="textbox" contenteditable="true" name="rabin_pub" id="rabin_pub"></div>
+	<h2>Private Keys (CJK):</h2>
+	<div  class="textbox" contenteditable="true" name="rabin_pvt" id="rabin_pvt"></div>
+<br>
+<hr>
 	<h4>Universal converter:  </h4>
 	<h2>Text message:</h2>
 	<div  class="textbox" contenteditable="true" name="univ_text" id="univ_text" 
@@ -193,13 +205,11 @@ Please enable JavaScript and reload the page!</p>
 	<h2>CJK number:</h2>
 	<div  class="textbox" contenteditable="true" name="univ_cjk" id="univ_cjk"
           onkeyup="universal_converter(this.innerText,'cjk')"></div>
-
+<br>
 <hr>
-	<h4>Rabin private keys generator: <input type="button" onclick="gen_rabin();" value="Generate"></h4>
-	<h2>Public Key (CJK):</h2>
-	<div  class="textbox" contenteditable="true" name="rabin_pub" id="rabin_pub"></div>
-	<h2>Private Keys (CJK):</h2>
-	<div  class="textbox" contenteditable="true" name="rabin_pvt" id="rabin_pvt"></div>
+	<h4>Local Storage: <input type="button" onclick="localStorage.setItem('tools_storage', document.getElementById('myStorage').innerHTML)" value="Save in your browser"></h4>
+	<h2>Text to save:</h2>
+	<div  class="textbox" contenteditable="true" name="myStorage" id="myStorage"></div>
 
 </div>
 
