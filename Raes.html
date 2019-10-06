@@ -7,7 +7,7 @@
 <meta name="author" content="Rui Santana Jr" />
 <link rel="stylesheet" type="text/css" href="./Rabin.css" />
 
-<title>Rui Cryptosystem v1.1</title>
+<title>Rui Cryptosystem v1.2</title>
 
 <!-- Created by Rui Santana Jr in 2017 using big int library -->
 
@@ -66,7 +66,7 @@ function calcular() {
 		radios = document.getElementById('inp');
 		document.getElementById('outp').innerText = outt;
 		document.getElementById('hexinput').innerText = rui_bytearray2hex(rui_str2bytearray(inp));
-		document.getElementById('hexoutput').innerText = rui_bytearray2hex(rui_base64decode(outt));
+		document.getElementById('hexoutput').innerText = rui_bytearray2hex(rui_base642bytearray(outt));
 	}
 	else
 	{
@@ -81,7 +81,7 @@ function calcular() {
 			else
 				outt = RAES128_CBC_decrypt_b64( inp, senha, 1);
 		document.getElementById('outp').innerText = outt;
-		document.getElementById('hexinput').innerText = rui_bytearray2hex(rui_base64decode(inp));
+		document.getElementById('hexinput').innerText = rui_bytearray2hex(rui_base642bytearray(inp));
 		document.getElementById('hexoutput').innerText = rui_bytearray2hex(rui_str2bytearray(document.getElementById('outp').value));
 	}
 	
@@ -127,16 +127,34 @@ Please enable JavaScript and reload the page!</p>
 		<iframe src="nayuki-password-generator.html" height="100%" width="100%" ></iframe>
 </div>
 <div class="container">
-<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⢺</h3>
+<h3>⣠⣾⠀ Cryptosystem suite by Rui ⠀⢺⢀⣝</h3>
 
 <div id="nav">
 	<ul>
-<li><a href="./Rabin.html">Rabin Encryption</a></li>
-<li><a href="./Rabin-dec.html">Rabin Decryption</a></li>
-<li><a href="./BigBlock.html">BigBlock enc/dec</a></li>
-<li><a class="active" href="./Raes.html">Raes enc/dec</a></li>
-<li><a href="./tools.html">Tools</a></li>
-<li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
+        <li><a href="./index.html">Home</a></li>
+        <li class="dropdown">
+           <a href="javascript:void(0)"  class="active" >Symmetric-key schemes</a>
+           <div class="dropdown-content">
+             <a href="./Raes.html" class="active" >Raes enc/dec</a>
+             <a href="./BigBlock.html"  >BigBlock enc/dec</a>
+           </div>
+        </li>
+        <li class="dropdown">
+           <a href="javascript:void(0)" >Rabin cryptosystem</a>
+           <div class="dropdown-content">
+              <a href="./Rabin-enc.html">Encryption</a>
+              <a href="./Rabin-dec.html">Decryption</a>
+           </div>
+        </li>
+        <li class="dropdown">
+            <a href="javascript:void(0)">Rabin signature</a>
+            <div class="dropdown-content">
+                <a href="./Rabin-sign.html">Sign</a>
+                <a href="./Rabin-verify.html">Verify signature</a>
+            </div>
+        </li>
+        <li><a href="./tools.html">Tools</a></li>
+        <li style="float:right"><a id="enhanced" href="javascript:void(0)" onclick="sw_enhanced();">Enhanced</a></li>
 	</ul>
 </div>
 
@@ -165,8 +183,8 @@ Please enable JavaScript and reload the page!</p>
 	<label><input type="radio" name="pad_mode" id="pad_mode" value="1byte" /> 1 byte - Texto ou dados</label><br>
 
 	<h2>Ação: </h2>
-	<label><input type="radio" name="action" id="action" value="encode" checked="checked" /> Codificar</label><br>
-	<label><input type="radio" name="action" id="action" value="decode" /> Decodificar</label><br>
+	<label><input type="radio" name="action" id="action" value="encode" /> Codificar</label><br>
+	<label><input type="radio" name="action" id="action" value="decode" checked="checked"/> Decodificar</label><br>
 
 	<h2>Password: </h2>
 	<input type="password" name="txtpass" id="txtpass" size="80" maxlength="200"
@@ -185,7 +203,7 @@ Please enable JavaScript and reload the page!</p>
 <h2>Recomendações:</h2>
 &bull;&nbsp;Modo ECB: somente um bloco de informação será codificado. Caracteres especiais usam mais de
 um byte, portanto pode ser que o limite seja atingido mesmo menos de 16 caracteres no texto.<br>
-&bull;&nbsp;Modo ECB: Os blocos criptografados serão encadeado para meior segurança. Também um vetor de
+&bull;&nbsp;Modo ECB: Os blocos criptografados serão encadeados para meior segurança. Também um vetor de
 inicialização aleatório será usado, portanto um bloco extra de informação (16 bytes) será gerado.<br>
 &bull;&nbsp;Padding: escolha o modo como a informação será preenchida para se ter um valor múltiplo de
 16 bytes. Terminador nulo é indicado para textos e são adicionados números aletórios. Portanto textos
@@ -211,8 +229,7 @@ de uma cifra de Feistel.<br>
 <p>
 
 <footer>
-<a href="./index.htm">Página inicial</a> |
-Copy right - Free to use | Release 04/12/2017
+Copy right - Free to use | Release 10/2019
 </footer>
 </div>
 

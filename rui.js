@@ -143,29 +143,21 @@ var raes_rsbox =  [
 /* Return: integer string in base10 from input string converted to utf-8 */
 function rui_str2dec(in_text)
 {
-	var i = 0,
-		ret,
-	    n_base,
-	    n_numb,
-	    my_array = rui_str2bytearray(in_text);
-	
-	ret    = int2bigInt(  0,1,1);
-	n_base = int2bigInt(256,1,1);
-	n_numb = int2bigInt(  1,1,1);
-	
-	var L = my_array.length;
-	for (i=0; i<L ; i++) {
-		ret = add(ret, mult(n_numb,int2bigInt(my_array[i],1,1)));
-		n_numb = mult(n_numb, n_base)
-	}
-	
-	return bigInt2str(ret,10);
+	return (rui_bytearray2dec(rui_str2bytearray(in_text)));
 }
 
 /* Input:  integer string in base10 */
 /* Return: text in utf-16 (default in javascript) */
 function rui_dec2str(in_dec)
 {
+    if ( !(typeof in_dec === 'string' || in_dec instanceof String) )
+		return undefined;
+
+    in_dec=in_dec.replace(/[^0-9]/g, '');
+    if (in_dec.length == 0) {
+        return "";
+    }
+    
 	var i = 0,
 		ret = "",
 	    x, y, q, r,
@@ -221,7 +213,8 @@ function rui_dec2str(in_dec)
 							ret+=String.fromCharCode( (cc >> 10) | 0xd800 ) + String.fromCharCode( (cc & 0x3FF) | 0xDc00);
 						} else
 							throw Error("rui_dec2str: Err3 Invalid continuation byte");
-					}
+					} else
+						throw Error("rui_dec2str: Err4 Invalid continuation byte");
 				}
 			}
 		}
@@ -232,8 +225,16 @@ function rui_dec2str(in_dec)
 
 /* Input:  integer string in base10 */
 /* Return: same integer in string base 256 (braille characters) */
-function rui_encodebraille(in_dec)
+function rui_dec2braille(in_dec)
 {
+    if ( !(typeof in_dec === 'string' || in_dec instanceof String) )
+		return undefined;
+
+    in_dec=in_dec.replace(/[^0-9]/g, '');
+    if (in_dec.length == 0) {
+        return "";
+    }
+    
 	var x = str2bigInt(in_dec,10,2);
 	var y = str2bigInt("256",10,2);
 	var q = new Array(x.length); // bi_copyInt_(q,0);
@@ -251,10 +252,24 @@ function rui_encodebraille(in_dec)
 	return (ret);
 }
 
+/* Input:  string base 256 (braille characters) */
+/* Return: string in base 10 decimal */
+function rui_braille2dec(in_braille){
+    return (rui_bytearray2dec(rui_braille2bytearray(in_braille)));
+}
+
 /* Input:  integer string in base10 */
 /* Return: same integer in string base 20480 (Chinese characters) */
-function rui_encodeCJK(in_dec)
+function rui_dec2cjk(in_dec)
 {
+    if ( !(typeof in_dec === 'string' || in_dec instanceof String) )
+		return undefined;
+
+    in_dec=in_dec.replace(/[^0-9]/g, '');
+    if (in_dec.length == 0) {
+        return "";
+    }
+    
 	var x = str2bigInt(in_dec,10,2);
 	var y = str2bigInt("20480",10,2);
 	var q = new Array(x.length); // bi_copyInt_(q,0);
@@ -274,13 +289,19 @@ function rui_encodeCJK(in_dec)
 
 /* Input:  integer string in base 20480 (Chinese characters) */
 /* Return: same integer in string base 10 */
-function rui_decodeCJK(in_str)
+function rui_cjk2dec(in_str)
 {
-	var i = 0,
-		ret,
+    if ( !(typeof in_str === 'string' || in_str instanceof String) )
+		return undefined;
+    if (in_str.length == 0) {
+        return "";
+    }
+
+    var i = 0,
+		ret = "",
 	    n_base,
 	    n_numb, byt;
-	
+
 	ret    = int2bigInt(  0,1,1);
 	n_base = int2bigInt(20480,1,1);
 	n_numb = int2bigInt(  1,1,1);
@@ -299,9 +320,17 @@ function rui_decodeCJK(in_str)
 
 /* Input:  integer string in base 10 */
 /* Return: same integer in string base 16 (hexadecimal) */
-function rui_decahex(in_str)
+function rui_dec2hex(in_dec)
 {
-	var x = str2bigInt(in_str,10,2);
+    if ( !(typeof in_dec === 'string' || in_dec instanceof String) )
+		return undefined;
+
+    in_dec=in_dec.replace(/[^0-9]/g, '');
+    if (in_dec.length == 0) {
+        return "";
+    }
+    
+	var x = str2bigInt(in_dec,10,2);
 	var y = str2bigInt("256",10,2);
 	var q = new Array(x.length); // bi_copyInt_(q,0);
 	var r = new Array(x.length); // bi_copyInt_(r,0);
@@ -317,84 +346,65 @@ function rui_decahex(in_str)
 			ret = r[0].toString(16) + ret;
 	}
 	if (ret.length==0)
-		ret="0";
-	return ret;
+		ret="00";
+
+    if (ret.startsWith("0"))
+        return(ret.slice(1));
+    else
+        return(ret);
 }
 
-/* Input:  integer: length of random number */
-/* Return: random integer string in base10 with length of input */
-function rui_genRandomNumbers(len)
-{
-	var ret = "", i, rnd;
-	var PAD = "000000000";
-	
-	var cryptoObject = null, x, padd, ret;
-	var x = new Uint32Array(1);
 
-	if ("crypto" in window)
-		cryptoObject = crypto;
-	else if ("msCrypto" in window)
-		cryptoObject = msCrypto;
+/* Input:  integer string in hexadecimal */
+/* Return: same integer in string base 10 (decimal) */
+function rui_hex2dec(in_hex){
+    if ( !(typeof in_hex === 'string' || in_hex instanceof String) )
+		return undefined;
 
-	for (i=0; i<len; i+=9)
-	{
-		if (cryptoObject != null ) {
-			cryptoObject.getRandomValues(x);
-			rnd = x[0] % 1000000000;
-		} else
-			rnd = Math.floor(Math.random() * 10000000000) % 1000000000;
-		ret += PAD.substring(0, 9 - rnd.toString().length) + rnd.toString();
-	}
-	
-	return ret.substring(0,len);
-
+    in_hex=in_hex.replace(/[^0-9a-fA-F]/g, '');
+    if (in_hex.length == 0) {
+        return "";
+    }
+    
+    return (bigInt2str(str2bigInt(in_hex,16,0),10));
 }
 
-/* Input:  integer: length of array */
-/* Return: array of pseudorandom bytes with length of input */
-function rui_genRandomArray()
-{
-	var ret = [], i;
-	var x = new Uint8Array(16);
-	var cryptoObject = null;
 
-	if ("crypto" in window)
-		cryptoObject = crypto;
-	else if ("msCrypto" in window)
-		cryptoObject = msCrypto;
+function rui_bytearray2hex(in_arr) {
 
-	if (cryptoObject != null ) {
-		cryptoObject.getRandomValues(x);
-		for (i=0; i<16; i++)
-			ret[i] = x[i];
-		return (ret);
-	}
+    if ( !Array.isArray(in_arr) )
+		return undefined;
+    
+    in_arr = in_arr.filter(function(i) {
+			return (i >= 0 && i<=255)
+            });
+    if (in_arr.length == 0) {
+        return "";
+    }
 
-	var debug = Date.now() + rui_genRandomNumbers(10);
-	
-	return (rui_hash(debug));
-}
-
-function rui_bytearray2hex(input) {
-	
-	var ret = input.map(function(i) {
+    var ret = in_arr.map(function(i) {
 			if (i < 16)
 				return("0" + i.toString(16));
 			else
 				return(i.toString(16));} ).join("");
-	return(ret);
+    if (ret.startsWith("0"))
+        return(ret.slice(1));
+    else
+        return(ret);
 }
 
 /* converts a string to byte array -> index 0 to n */
 /* it takes as input utf-16 chars (default in javascript) and encode it as utf-8 */
-function rui_str2bytearray(mytext)
+function rui_str2bytearray(in_str)
 {
+    if ( !(typeof in_str === 'string' || in_str instanceof String) )
+		return undefined;
+
 	var byarr = [];
-	
 	var c,c1, i;
-	
-	for (i=0; i<mytext.length; i++) {
-		c = mytext.charCodeAt(i);
+
+	for (i=0; i<in_str.length; i++) {
+		c = in_str.charCodeAt(i);
 		
 		if (c < 128)
 			byarr.push(c);
@@ -409,7 +419,7 @@ function rui_str2bytearray(mytext)
 					byarr.push((c & 63) | 128); //ok
 				} else {
 					i++;
-					c1 = mytext.charCodeAt(i);
+					c1 = in_str.charCodeAt(i);
 					if ((c & 0xFC00) == 0xd800 && (c1 & 0xFC00) == 0xDC00) {
 						c = ((c & 0x3FF) << 10) + (c1 & 0x3FF) + 0x10000;
 						byarr.push(((c >> 18 ) & 63) | 0xf0); //ok
@@ -422,41 +432,402 @@ function rui_str2bytearray(mytext)
 			}
 		}
 	}
-	return (byarr);
+	return (byarr); // returns [ ] if in_str.lenght() == 0
 }
 
 
+/* Input:  byte array of string encoded in UTF-8 */
+/* Return: string in UTF-16 (default in javascript)  */
+function rui_bytearray2str(in_arr) {
+	
+	var i, L;
+	var c1, c2, c3, c4, cc;
+	var ret = "";
+
+    if ( !Array.isArray(in_arr) )
+		return undefined;
+
+	try {
+		L = in_arr.length;
+		for (i=0; i<L; i++) {
+			c1 = in_arr[i];
+			if ( c1 < 128 ) {
+				ret+=String.fromCharCode(c1);
+			} else {
+				if ((c1 & 0xE0) == 0xC0) { //twobytes utf8
+					c2 = in_arr[++i];
+					if ((c2 & 0xC0) == 0x80) 
+						ret+=String.fromCharCode( (c2 & 0x3F) | ((c1 & 0x1F) << 6));
+					else
+						throw 1;
+				} else {
+					if ((c1 & 0xF0) == 0xE0) { //threebytes utf8
+						c2 = in_arr[++i];
+						c3 = in_arr[++i];
+						if (((c2 & 0xC0) == 0x80) && ((c3 & 0xC0) == 0x80)) 
+							ret+=String.fromCharCode( (c3 & 0x3F) | ((c2 & 0x3F) << 6) | ((c1 & 0xF) << 12));
+						else
+							throw 2;
+						
+					} else {
+						if ((c1 & 0xF8) == 0xF0) { //fourbytes utf8
+							c2 = in_arr[++i];
+							c3 = in_arr[++i];
+							c4 = in_arr[++i];
+							if (((c2 & 0xC0) == 0x80) && ((c3 & 0xC0) == 0x80) && ((c4 & 0xC0) == 0x80)) {
+								cc = (c4 & 0x3F) | ((c3 & 0x3F) << 6) | ((c2 & 0x3F) << 12) | ((c1 & 0x7) << 18);
+								cc-= 0x10000;
+								ret+=String.fromCharCode( (cc >> 10) | 0xd800 ) + String.fromCharCode( (cc & 0x3FF) | 0xDc00);
+							} else
+								throw 3;
+						} else
+							throw 4;
+					}
+				}
+			}
+		}
+	} catch (e) {
+		return("#Error " + e.toString() + ": decoding utf-8 string");
+	}
+	
+	return (ret);
+}
+
 /* Input:  byte array */
 /* Return: same content in string base 256 (braille characters) */
-function rui_encode_b_braille(in_b_arr)
+function rui_bytearray2braille(in_arr)
 {
-	var ret="", i;
+	var ret="", i, len;
 
-	for (i=0; i< in_b_arr.length; i++)
-		if (i != 0 && i % 60 == 0)
-			ret+="\n" + String.fromCharCode(in_b_arr[i] + 10240);
-		else
-			ret+=String.fromCharCode(in_b_arr[i] + 10240);
+    if ( !Array.isArray(in_arr) )
+		return undefined;
 
-	if (i==0)
-		ret=String.fromCharCode(10240);
+	len = in_arr.length;
 
-	return (ret);
+    for (i=0; i< len; i++)
+		ret+=String.fromCharCode(in_arr[i] + 10240);
+
+	return (ret); //return "" if bytearray is [ ]
 }
 
 /* Input:  string in braille */
 /* Return: byte array  */
-function rui_decode_b_braille(in_str)
+function rui_braille2bytearray(in_braille)
 {
+    
+    if ( !(typeof in_braille === 'string' || in_braille instanceof String) )
+		return undefined;
+
+	in_braille = in_braille.replace(/[^⠀-⣿]/g, ''); //this is not space, but empty braille char
+    
 	var ret=[], i;
+
+	for (i=0; i< in_braille.length; i++)
+		ret.push(in_braille.charCodeAt(i) - 10240);
+
+	return (ret); //returns [ ] if input is ""
+}
+
+/*
+** base64encode
+**
+** encode 16 8-bit binary bytes as 24 '6-bit' characters
+*/
+function rui_bytearray2base64( bytes_in )
+{
+    if ( !Array.isArray(bytes_in) )
+		return undefined;
+
+    var i, len, len_in = 0;
+    var out = "";
+ 
+	len = bytes_in.length;
+    for (i=0; i<len ; i++) {
+        if (i % 3 == 0)
+			if (i != 0 && i % 60 == 0) // add \n every 80 chars
+				out += "\n" + cb64.charAt( (bytes_in[i] >> 2));
+			else
+				out += cb64.charAt( (bytes_in[i] >> 2));
+        if (i % 3 == 1)
+            out += cb64.charAt( ((bytes_in[i-1] & 0x03) << 4) | ((bytes_in[i] & 0xf0) >> 4) );
+        if (i % 3 == 2)
+            out = out.concat(cb64.charAt( ((bytes_in[i-1] & 0x0f) << 2) | ((bytes_in[i] & 0xc0) >> 6) ) , cb64.charAt( (bytes_in[i] & 0x3f) ) );
+    }
+    
+    if (len % 3 == 1)
+        out = out.concat( cb64.charAt( ((bytes_in[i-1] & 0x03) << 4)  ), "==" );
+    if (len % 3 == 2)
+        out = out.concat( cb64.charAt( ((bytes_in[i-1] & 0x0f) << 2) ), "=");
+
+	return(out); //returns "" if bytes_in is [ ]
+}
+
+
+/*
+** decodeblock
+**
+** decode 4 '6-bit' characters into 3 8-bit binary bytes. Any length.
+*/
+function rui_base642bytearray( in_b64 )
+{
+   if (typeof in_b64 === 'undefined') {
+        return undefined;
+    }
+
+    var i, len_data, error=0;
+    var temp = [], out = [];
+
+	in_b64 = in_b64.replace(/[^a-zA-Z0-9+/=]/g, '');
 	
-	in_str = in_str.replace(/[^⠀-⣿]/g, '');
+	if (in_b64.length % 4 == 0 && in_b64.length != 0)
+		for (i=0; i<in_b64.length && error == 0; i++)
+		{
+			if (in_b64.charCodeAt(i)>=65 && in_b64.charCodeAt(i)<=90) // between A and Z
+				temp[i]=in_b64.charCodeAt(i)-65;
+			else
+				if (in_b64.charCodeAt(i)>=97 && in_b64.charCodeAt(i)<=122) // between a and z
+					temp[i]=in_b64.charCodeAt(i)-71;
+				else
+					if (in_b64.charCodeAt(i)>=48 && in_b64.charCodeAt(i)<=57) // between 0 and 9
+						temp[i]=in_b64.charCodeAt(i)+4;
+					else
+						if (in_b64.charAt(i) == "+" )   // +
+							temp[i]=62;
+						else
+							if (in_b64.charAt(i)== "/") // /
+								temp[i]=63;
+							else             // = or anything else
+								if (in_b64.charAt(i)== "=") // =
+									temp[i]=0;
+								else
+									error = 1; //never reaches this point!
+		}
+	else
+		return (out); //malformed base64 string, returns empty array
+	
+    for (i=0, len_data = 0; i<in_b64.length;)
+    {
+        out[ len_data++ ] = (temp[i] << 2 | temp[i+1] >> 4) & 0xFF;
+        i+=2;
+        if (in_b64.charAt(i)=='=')
+            break;
+        out[ len_data++ ] = (temp[i-1] << 4 | temp[i] >> 2) & 0xFF;
+        i++;
+        if (in_b64.charAt(i)=='=')
+            break;
+        out[ len_data++ ] = (((temp[i-1] << 6) & 0xc0) | temp[i]) & 0xFF;
+        i++;
+    }
 
-	for (i=0; i< in_str.length; i++)
-		ret[i]= in_str.charCodeAt(i) - 10240;
+    return(out);
+}
 
+/* Input:  integer string in base 10 */
+/* Return: same input in base64    */
+function rui_dec2base64( in_dec ){
+   return (rui_bytearray2base64(rui_dec2bytearray(in_dec)));
+}
+
+/* Input:  base64 string  */
+/* Return: same input in base10    */
+function rui_base642dec( in_b64 ){
+   return (rui_bytearray2dec(rui_base642bytearray(in_b64)));
+}
+
+
+/* Input:  integer string in base10 */
+/* Return: same input in byte array */
+function rui_dec2bytearray(in_dec)
+{
+    if ( !(typeof in_dec === 'string' || in_dec instanceof String) )
+		return undefined;
+
+    in_dec=in_dec.replace(/[^0-9]/g, '');
+    if (in_dec.length == 0) {
+        return ( [ ] );
+    }
+   
+	var x = str2bigInt(in_dec,10,2);
+	var y = str2bigInt("256",10,2);
+	var q = new Array(x.length); // bi_copyInt_(q,0);
+	var r = new Array(x.length); // bi_copyInt_(r,0);
+	var ret= [ ] ;
+	var hex="";
+
+	while (!isZero(x)) {
+		divide_(x,y,q,r);
+		ret.push(r[0]);
+		copy_(x, q);
+	}
+	if (ret.length==0)
+		ret.push(0);
 	return (ret);
 }
+
+/* Input:  byte array */
+/* Return: same input in base 10 */
+function rui_bytearray2dec(in_arr) {
+
+    if ( !Array.isArray(in_arr) )
+		return undefined;
+    in_arr = in_arr.filter(function(i) {
+			return (i >= 0 && i<=255)
+            });
+    if (in_arr.length == 0) {
+        return "";
+    }
+    
+    var ret, n_base, n_numb, i, L;
+ 
+    ret    = int2bigInt(  0,1,1);
+	n_base = int2bigInt(256,1,1);
+	n_numb = int2bigInt(  1,1,1);
+	
+	L = in_arr.length;
+	for (i=0; i<L ; i++) {
+		ret = add(ret, mult(n_numb,int2bigInt(in_arr[i],1,1)));
+		n_numb = mult(n_numb, n_base)
+	}
+	
+	return bigInt2str(ret,10);
+}
+
+
+/* Input:  primary key (byte array) with 16 bytes */
+/* Return: Array of keys (8 item) (key schedule) */
+function rui_keysch_bigblock(prim_key) {
+    var i,j,k, sh, z;
+
+    var previous= [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    var temp    = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    var permuta = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    var rcon = [0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e ];
+    
+    var rresult = prim_key.slice(0);
+    var ret=[ [] ];
+    
+    ret[0] = prim_key.slice(0);
+    if (prim_key.length != 16)
+		return undefined;
+		
+    for( k=0; k<8; k++)
+    {
+        for (i=0; i<16; i++)
+			temp[i] = rresult[i];
+			
+		temp[0]^=rcon[k];
+		temp[15]^=rcon[k];
+
+        for (i=0; i<8; i++)
+            rresult[i] = temp[i+8];
+
+        for (i=8; i<16; i++)
+            rresult[i] = hashsbox[temp[i] ^ temp[i-8] ^ previous[i]];
+       
+        for (j=0; j<8; j++) {
+            permuta[j  ]=0;
+            permuta[j+8]=0;
+            z = ((128 >> j) & 255) | ((128 << (8 - j)) & 255 );
+            for (i=0; i<8; i++) {
+                if (i-j < 0)
+                    sh=i-j+8;
+                else
+                    sh=i-j;
+                permuta[j  ]+= (((rresult[i*2  ]&z) >> sh) & 255) | (((rresult[i*2  ]&z) << (8 - sh)) & 255);
+                permuta[j+8]+= (((rresult[i*2+1]&z) >> sh) & 255) | (((rresult[i*2+1]&z) << (8 - sh)) & 255);
+            }
+        }
+        for (i=0; i<16; i++) {
+			rresult[i]  = permuta[i];
+			previous[i] = temp[i];
+		}
+		ret[k+1] = rresult.slice(0);
+    }
+    
+    return(ret);
+}
+
+
+/* Input:  text in utf-16 (default in javascript). Any length. */
+/* Return: byte array containing the hash (16 bytes) */
+function rui_hash(in_text)
+{
+
+    var i,j,k, sh, z, i_inp;
+    var previous= [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    var temp    = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    var permuta = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    var rresult = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+
+	//if in_txt is 32 hex chars long, don't hash.
+    if ( /^[0-9A-Fa-f]{32}$/g.test(in_text) ) {
+		for (i=0; i< 16; i++)
+			rresult[i] = parseInt(in_text.slice(2*i, 2*i+2),16);
+		return(rresult);
+	}
+
+    var inp_bytes = rui_str2bytearray(in_text);
+
+    if (typeof inp_bytes === 'undefined') { //empty string, hash even so
+        inp_bytes = [ 0 ];
+    }
+    
+	for (i=inp_bytes.length % 16; i % 16 !=0 ; i++)
+			inp_bytes.push(0);
+			
+	for (i_inp=0; i_inp<16; i_inp++)
+			rresult[i_inp] = inp_bytes[i_inp];
+
+	do {
+		for( k=0; k<9; k++)
+		{
+			for (i=0; i<16; i++) {
+				temp[i] = rresult[i];
+			}
+
+			for (i=0;i<8;i++)
+				rresult[i] = temp[i+8];
+
+			for (i=8;i<16;i++)
+				rresult[i] = hashsbox[temp[i] ^ temp[i-8] ^ previous[i]];
+		   
+			for (j=0;j<8;j++)
+			{
+				var sh;
+				permuta[j  ]=0;
+				permuta[j+8]=0;
+				z = ((128 >> j) & 255) | ((128 << (8 - j)) & 255 );
+				for (i=0; i<8;i++)
+				{
+					if (i-j < 0)
+						sh=i-j+8;
+					else
+						sh=i-j;
+					permuta[j  ]+= (((rresult[i*2  ]&z) >> sh) & 255) | (((rresult[i*2  ]&z) << (8 - sh)) & 255);
+					permuta[j+8]+= (((rresult[i*2+1]&z) >> sh) & 255) | (((rresult[i*2+1]&z) << (8 - sh)) & 255);
+				}
+			}
+			for (i=0; i<16; i++) {
+				rresult[i]  = permuta[i];
+				previous[i] = temp[i];
+			}
+		}
+	
+		if (i_inp < inp_bytes.length) {
+			for (i=0; i<16; i++) {
+				rresult[i]  = rresult[i] ^ inp_bytes[i_inp + i];
+				previous[i] = 0;
+			}
+			i_inp+=16;
+		} else {
+			break;
+		}
+	
+	} while (1);
+	
+	return(rresult);
+}
+
 
 /* Input:  Byte arrays (message and password) */
 /* Return: byte array decoded */
@@ -661,287 +1032,59 @@ function rui_enc_bigblock(b_msg, b_senha) {
 
 }
 
-/* Input:  byte array of string encoded in UTF-8 */
-/* Return: string in UTF-16 (default in javascript)  */
-function rui_bytearray2str(arr) {
-	
-	var i, L;
-	var c1, c2, c3, c4, cc;
-	var ret = "";
-	
-	try {
-		L = arr.length;
-		for (i=0; i<L; i++) {
-			c1 = arr[i];
-			if ( c1 < 128 ) {
-				ret+=String.fromCharCode(c1);
-			} else {
-				if ((c1 & 0xE0) == 0xC0) { //twobytes utf8
-					c2 = arr[++i];
-					if ((c2 & 0xC0) == 0x80) 
-						ret+=String.fromCharCode( (c2 & 0x3F) | ((c1 & 0x1F) << 6));
-					else
-						throw 1;
-				} else {
-					if ((c1 & 0xF0) == 0xE0) { //threebytes utf8
-						c2 = arr[++i];
-						c3 = arr[++i];
-						if (((c2 & 0xC0) == 0x80) && ((c3 & 0xC0) == 0x80)) 
-							ret+=String.fromCharCode( (c3 & 0x3F) | ((c2 & 0x3F) << 6) | ((c1 & 0xF) << 12));
-						else
-							throw 2;
-						
-					} else {
-						if ((c1 & 0xF8) == 0xF0) { //fourbytes utf8
-							c2 = arr[++i];
-							c3 = arr[++i];
-							c4 = arr[++i];
-							if (((c2 & 0xC0) == 0x80) && ((c3 & 0xC0) == 0x80) && ((c4 & 0xC0) == 0x80)) {
-								cc = (c4 & 0x3F) | ((c3 & 0x3F) << 6) | ((c2 & 0x3F) << 12) | ((c1 & 0x7) << 18);
-								cc-= 0x10000;
-								ret+=String.fromCharCode( (cc >> 10) | 0xd800 ) + String.fromCharCode( (cc & 0x3FF) | 0xDc00);
-							} else
-								throw 3;
-						}
-					}
-				}
-			}
-		}
-	} catch (e) {
-		return("#Error " + e.toString() + ": decoding utf-8 string");
-	}
-	
-	return (ret);
-}
 
-/* Input:  primary key (byte array) with 16 bytes */
-/* Return: Array of keys (8 item) (key schedule) */
-function rui_keysch_bigblock(prim_key) {
-    var i,j,k, sh, z;
-
-    var previous= [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-    var temp    = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-    var permuta = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-    var rcon = [0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e ];
-    
-    var rresult = prim_key.slice(0);
-    var ret=[ [] ];
-    
-    ret[0] = prim_key.slice(0);
-    if (prim_key.length != 16)
-		return undefined;
-		
-    for( k=0; k<8; k++)
-    {
-        for (i=0; i<16; i++)
-			temp[i] = rresult[i];
-			
-		temp[0]^=rcon[k];
-		temp[15]^=rcon[k];
-
-        for (i=0; i<8; i++)
-            rresult[i] = temp[i+8];
-
-        for (i=8; i<16; i++)
-            rresult[i] = hashsbox[temp[i] ^ temp[i-8] ^ previous[i]];
-       
-        for (j=0; j<8; j++) {
-            permuta[j  ]=0;
-            permuta[j+8]=0;
-            z = ((128 >> j) & 255) | ((128 << (8 - j)) & 255 );
-            for (i=0; i<8; i++) {
-                if (i-j < 0)
-                    sh=i-j+8;
-                else
-                    sh=i-j;
-                permuta[j  ]+= (((rresult[i*2  ]&z) >> sh) & 255) | (((rresult[i*2  ]&z) << (8 - sh)) & 255);
-                permuta[j+8]+= (((rresult[i*2+1]&z) >> sh) & 255) | (((rresult[i*2+1]&z) << (8 - sh)) & 255);
-            }
-        }
-        for (i=0; i<16; i++) {
-			rresult[i]  = permuta[i];
-			previous[i] = temp[i];
-		}
-		ret[k+1] = rresult.slice(0);
-    }
-    
-    return(ret);
-}
-
-
-/* Input:  text in utf-16 (default in javascript). Any length. */
-/* Return: byte array containing the hash (16 bytes) */
-function rui_hash(in_text)
+/* Input:  integer: length of random number */
+/* Return: random integer string in base10 with length of input */
+function rui_genRandomNumbers(len)
 {
-
-    var i,j,k, sh, z, i_inp;
-    var previous= [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-    var temp    = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-    var permuta = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-    var rresult = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-
-	//if in_txt is 32 hex chars long, don't hash.
-    if ( /^[0-9A-Fa-f]{32}$/g.test(in_text) ) {
-		for (i=0; i< 16; i++)
-			rresult[i] = parseInt(in_text.slice(2*i, 2*i+2),16);
-		return(rresult);
-	}
+	var ret = "", i, rnd;
+	var PAD = "000000000";
 	
-    var inp_bytes = rui_str2bytearray(in_text);
-    
-	for (i=inp_bytes.length % 16; i % 16 !=0 ; i++)
-			inp_bytes.push(0);
-			
-	for (i_inp=0; i_inp<16; i_inp++)
-			rresult[i_inp] = inp_bytes[i_inp];
+	var cryptoObject = null, x, padd, ret;
+	var x = new Uint32Array(1);
 
-	do {
-		for( k=0; k<9; k++)
-		{
-			for (i=0; i<16; i++) {
-				temp[i] = rresult[i];
-			}
+	if ("crypto" in window)
+		cryptoObject = crypto;
+	else if ("msCrypto" in window)
+		cryptoObject = msCrypto;
 
-			for (i=0;i<8;i++)
-				rresult[i] = temp[i+8];
-
-			for (i=8;i<16;i++)
-				rresult[i] = hashsbox[temp[i] ^ temp[i-8] ^ previous[i]];
-		   
-			for (j=0;j<8;j++)
-			{
-				var sh;
-				permuta[j  ]=0;
-				permuta[j+8]=0;
-				z = ((128 >> j) & 255) | ((128 << (8 - j)) & 255 );
-				for (i=0; i<8;i++)
-				{
-					if (i-j < 0)
-						sh=i-j+8;
-					else
-						sh=i-j;
-					permuta[j  ]+= (((rresult[i*2  ]&z) >> sh) & 255) | (((rresult[i*2  ]&z) << (8 - sh)) & 255);
-					permuta[j+8]+= (((rresult[i*2+1]&z) >> sh) & 255) | (((rresult[i*2+1]&z) << (8 - sh)) & 255);
-				}
-			}
-			for (i=0; i<16; i++) {
-				rresult[i]  = permuta[i];
-				previous[i] = temp[i];
-			}
-		}
-	
-		if (i_inp < inp_bytes.length) {
-			for (i=0; i<16; i++) {
-				rresult[i]  = rresult[i] ^ inp_bytes[i_inp + i];
-				previous[i] = 0;
-			}
-			i_inp+=16;
-		} else {
-			break;
-		}
-	
-	} while (1);
-	
-	return(rresult);
-}
-
-/*
-** base64encode
-**
-** encode 16 8-bit binary bytes as 24 '6-bit' characters
-*/
-function rui_base64encode( bytes_in )
-{
-    var i, len, len_in = 0;
-    var out = "";
-
-    if ( !Array.isArray(bytes_in) )
-		return undefined;
-
-	len = bytes_in.length;
-	if (len == 0)
-		return undefined;
-
-    for (i=0; i<len ; i++) {
-        if (i % 3 == 0)
-			if (i != 0 && i % 60 == 0) // add \n every 80 chars
-				out += "\n" + cb64.charAt( (bytes_in[i] >> 2));
-			else
-				out += cb64.charAt( (bytes_in[i] >> 2));
-        if (i % 3 == 1)
-            out += cb64.charAt( ((bytes_in[i-1] & 0x03) << 4) | ((bytes_in[i] & 0xf0) >> 4) );
-        if (i % 3 == 2)
-            out = out.concat(cb64.charAt( ((bytes_in[i-1] & 0x0f) << 2) | ((bytes_in[i] & 0xc0) >> 6) ) , cb64.charAt( (bytes_in[i] & 0x3f) ) );
-    }
-    
-    if (len % 3 == 1)
-        out = out.concat( cb64.charAt( ((bytes_in[i-1] & 0x03) << 4)  ), "==" );
-    if (len % 3 == 2)
-        out = out.concat( cb64.charAt( ((bytes_in[i-1] & 0x0f) << 2) ), "=");
-
-	return(out);
-}
-
-
-/*
-** decodeblock
-**
-** decode 4 '6-bit' characters into 3 8-bit binary bytes. Any length.
-*/
-function rui_base64decode( in_b64 )
-{  
-    var i, len_data, error=0;
-    var temp = [], out = [];
-
-	in_b64 = in_b64.replace(/[^a-zA-Z0-9+/=]/g, '');
-	
-	if (in_b64.length % 4 == 0)
-		for (i=0; i<in_b64.length && error == 0; i++)
-		{
-			if (in_b64.charCodeAt(i)>=65 && in_b64.charCodeAt(i)<=90) // between A and Z
-				temp[i]=in_b64.charCodeAt(i)-65;
-			else
-				if (in_b64.charCodeAt(i)>=97 && in_b64.charCodeAt(i)<=122) // between a and z
-					temp[i]=in_b64.charCodeAt(i)-71;
-				else
-					if (in_b64.charCodeAt(i)>=48 && in_b64.charCodeAt(i)<=57) // between 0 and 9
-						temp[i]=in_b64.charCodeAt(i)+4;
-					else
-						if (in_b64.charAt(i) == "+" )   // +
-							temp[i]=62;
-						else
-							if (in_b64.charAt(i)== "/") // /
-								temp[i]=63;
-							else             // = or anything else
-								if (in_b64.charAt(i)== "=") // =
-									temp[i]=0;
-								else
-									error = 1;
-		}
-	else
-		error = 1;
-	
-
-	if (error == 1 )
-		return undefined;
-	else
+	for (i=0; i<len; i+=9)
 	{
-		for (i=0, len_data = 0; i<in_b64.length;)
-		{
-			out[ len_data++ ] = (temp[i] << 2 | temp[i+1] >> 4) & 0xFF;
-			i+=2;
-			if (in_b64.charAt(i)=='=')
-				break;
-			out[ len_data++ ] = (temp[i-1] << 4 | temp[i] >> 2) & 0xFF;
-			i++;
-			if (in_b64.charAt(i)=='=')
-				break;
-			out[ len_data++ ] = (((temp[i-1] << 6) & 0xc0) | temp[i]) & 0xFF;
-			i++;
-		}
-
-		return(out);
+		if (cryptoObject != null ) {
+			cryptoObject.getRandomValues(x);
+			rnd = x[0] % 1000000000;
+		} else
+			rnd = Math.floor(Math.random() * 10000000000) % 1000000000;
+		ret += PAD.substring(0, 9 - rnd.toString().length) + rnd.toString();
 	}
+	
+	return ret.substring(0,len);
+
+}
+
+/* Input:  integer: length of array */
+/* Return: array of pseudorandom bytes with length of input */
+function rui_genRandomArray()
+{
+	var ret = [], i;
+	var x = new Uint8Array(16);
+	var cryptoObject = null;
+
+	if ("crypto" in window)
+		cryptoObject = crypto;
+	else if ("msCrypto" in window)
+		cryptoObject = msCrypto;
+
+	if (cryptoObject != null ) {
+		cryptoObject.getRandomValues(x);
+		for (i=0; i<16; i++)
+			ret[i] = x[i];
+		return (ret);
+	}
+
+	var debug = Date.now() + rui_genRandomNumbers(10);
+	
+	return (rui_hash(debug));
 }
 
 // This function produces Nb(Nr+1) round keys. The round keys are used in each round to decrypt the states. 
@@ -1014,7 +1157,7 @@ function KeyExpansion( key0 )
 function RAES128_ECB_decrypt_b64( input, key_txt, padding)
 {
 	var cipher_byt, decoded, n=0, temp;
-	cipher_byt = rui_base64decode( input );
+	cipher_byt = rui_base642bytearray( input );
 	
 	if (cipher_byt === undefined)
 		return ("۞ Is input base64? ۞");
@@ -1199,7 +1342,7 @@ function RAES128_ECB_encrypt_b64( input, key_txt, padding)
 	var encoded = RAES_Cipher( plain_byt, rui_hash(key_txt));
 
 	// Then finally encode data in base64 notation.
-	return (rui_base64encode(encoded));
+	return (rui_bytearray2base64(encoded));
 
 }
 
@@ -1351,7 +1494,7 @@ function RAES128_CBC_encrypt_b64( input, key_txt, padding)
 	}
 
 	// Then finally encode data in base64 notation.
-	return (rui_base64encode(encoded));
+	return (rui_bytearray2base64(encoded));
 
 }
 
@@ -1361,7 +1504,7 @@ function RAES128_CBC_decrypt_b64( input, key_txt, padding)
 {
 	var cipher_byt, block_byt, decoded, n=0, temp, total_blocks, key_byt, i, j, n;
 	var plain_byt = [];
-	cipher_byt = rui_base64decode( input );
+	cipher_byt = rui_base642bytearray( input );
 	
 	if (cipher_byt === undefined)
 		return ("۞ Is input base64? ۞");
