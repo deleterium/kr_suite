@@ -171,11 +171,17 @@ Please enable JavaScript and reload the page!</p>
 </div>
 
 <div class="primary">
-	<h4>Rabin private keys generator: <input type="button" onclick="gen_rabin();" value="Generate"></h4>
+	<h2>Rabin private keys generator: <input type="button" onclick="gen_rabin();" value="Generate"></h2>
 	<h2>Public Key (CJK):</h2>
 	<div  class="textbox" contenteditable="true" name="rabin_pub" id="rabin_pub"></div>
 	<h2>Private Keys (CJK):</h2>
 	<div  class="textbox" contenteditable="true" name="rabin_pvt" id="rabin_pvt"></div>
+<br>
+&bull;&nbsp;Clique em "Generate" para criar chaves. Chaves acima de 1024 bits são suficientemente fortes.<br>
+&bull;&nbsp;Chaves acima de 2000 bits podem demorar para serem geradas ou travar o navegador.<br>
+&bull;&nbsp;Não recomendo chaves acima de 3000 bits: segurança demasiada desnecessária.<br>
+&bull;&nbsp;Ao término do processo, salve os arquivos e compartilhe sua chave pública.<br>
+&bull;&nbsp;Guarde sua chave particular de preferência em unidade criptografada.<br>
 <br>
 <hr>
 	<h4>Universal converter:  </h4>
@@ -206,23 +212,19 @@ Please enable JavaScript and reload the page!</p>
 	<div  class="textbox" contenteditable="true" name="univ_cjk" id="univ_cjk"
           onkeyup="universal_converter(this.innerText,'cjk')"></div>
 <br>
+&bull;&nbsp;Digite ou cole o texto na respectiva caixa e ele será transcodificado para os diferentes padrões.<br>
+<br>
 <hr>
 	<h4>Local Storage: <input type="button" onclick="localStorage.setItem('tools_storage', document.getElementById('myStorage').innerHTML)" value="Save in your browser"></h4>
 	<h2>Text to save:</h2>
 	<div  class="textbox" contenteditable="true" name="myStorage" id="myStorage"></div>
-
+<br>
+&bull;&nbsp;Salve algum texto localmente em seu navegador. Salve-o codificado!<br>
+&bull;&nbsp;Digite o texto e clique em "Save in your browser". Ele estará disponível na próxima vez que
+a página for carregada.<br>
+&bull;&nbsp;O texto será perdido caso seja feita a limpeza do cache do navegador.<br>
 </div>
 
-
-<h2>Tradutor: decimal &#8596; CJK</h2>
-&bull;&nbsp;Tradutor de número decimal para número codificado com CJK e vice-versa.<br>
-
-<h2>Gerador de chaves "Rabin":</h2>
-&bull;&nbsp;Clique em "Generate" para criar chaves. Chaves acima de 1024 bits são suficientemente fortes.<br>
-&bull;&nbsp;Chaves acima de 2000 bits podem demorar para serem geradas ou travar o navegador.<br>
-&bull;&nbsp;Não recomendo chaves acima de 3000 bits: segurança demasiada desnecessária.<br>
-&bull;&nbsp;Ao término do processo, salve os arquivos e compartilhe sua chave pública.<br>
-&bull;&nbsp;Guarde sua chave particular de preferência em unidade criptografada.<br>
 
 <!--Page content ends here; don't delete this comment.-->
 

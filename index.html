@@ -58,7 +58,7 @@ Please enable JavaScript and reload the page!</p>
 	<p>&nbsp;</p>
 	<h2>Rabin</h2>
 <p>O método Rabin de criptografia utiliza chaves assimétricas, ou seja, a chave para criptografar é diferente da
-chave para descriptografar o conteúdo. É muito usado quando o emissor e o receptor não podem se comunicar secreetamente
+chave para descriptografar o conteúdo. É muito usado quando o emissor e o receptor não podem se comunicar secretamente
 antes de enviar mensagens. Nesse caso o emissor só precisa ter certeza que sabe a chave pública do receptor, pois somente
 ele poderá saber o conteúdo da mensagem.</p>
 <p>Para usá-la, primeiramente crie suas próprias chaves, na página "Tools". Escolha um tamanho adequado de chave (geralmente
@@ -69,6 +69,9 @@ Distribua também essa página com a suíte de programas.</p>
 <p>Uma das possibilidades é usar a criptografia Rabin para a troca de mensagens, que, embora bastante segura, também 
 demanda muito esforço computacional e não é prática. A segunda alternativa é usar a criptografia Rabin para informar 
 uma senha comum com a outra parte, e a partir daí usar a criptografia BigBlock ou RAES que é mais prática para conversas.</p>
+<p>Também está incluido um esquema de assinatura digital. Isso garante que a mensagem efetivamente foi gerada pelo emissor e
+não foi adulterada no meio do caminho.
+</p>
 	<h2>BigBlock</h2>
 <p>Esse método é baseado no embaralhamento da mensagem com a chave. Consiste em alternar, reverter e rotacionar os bytes
 da mensagem enquanto mistura-os com uma expansão da chave. O nome foi escolhido pois o tamanho do bloco para criptografia
@@ -84,7 +87,8 @@ codificada em Base64 para ser mostrada como texto.</p>
 
 
     <h2>Informações gerais</h2>
-<p>É mais seguro ainda fazer o download desse site e usá-lo diretamente no seu computador <a href="./kr_suite-1.1.zip">kr_suite-1.1.zip</a>.
+<p>É mais seguro ainda fazer o download desse site e usá-lo diretamente no seu computador. O Código está disponível no
+github em sua última versão <a href="https://github.com/deleterium/kr_suite">https://github.com/deleterium/kr_suite</a>.
 Ele não depende de nenhuma
 comunicação com a internet para funcionar. Distribua para as pessoas que também quiserem usar a criptografia para comunicação.</p>
 </div>
